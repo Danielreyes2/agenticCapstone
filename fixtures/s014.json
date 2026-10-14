@@ -1,0 +1,76 @@
+{
+  "scenario_id": "s014",
+  "date": "2026-03-12",
+  "fiduciary": {
+    "cycle_budget": 400.00,
+    "discretionary_remaining": 140.00,
+    "days_left_in_cycle": 8,
+    "accounts": [
+      {"id": "checking", "kind": "deposit", "balance": 2310.44},
+      {"id": "card_a", "kind": "credit", "statement_balance": 545.52},
+      {"id": "card_b", "kind": "credit", "statement_balance": 320.04}
+    ],
+    "transactions": [
+      {"date": "2026-03-04", "account": "card_a", "kind": "purchase",
+       "descriptor": "AplPay SAFEWAY  SAN FRANCISCO  CA",
+       "statement_category": "Merchandise & Supplies-Groceries",
+       "reward_category": "us_supermarket", "amount": 86.40},
+      {"date": "2026-03-06", "account": "card_b", "kind": "purchase",
+       "descriptor": "L&J CAFE  EL PASO  TX",
+       "statement_category": "Restaurant-Restaurant",
+       "reward_category": "dining", "amount": 72.15},
+      {"date": "2026-03-09", "account": "card_a", "kind": "purchase",
+       "descriptor": "SPEEDWAY 47327  HORIZON CITY  TX",
+       "statement_category": "Merchandise & Supplies-Groceries",
+       "reward_category": "gas", "amount": 53.60},
+      {"date": "2026-03-11", "account": "card_a", "kind": "purchase",
+       "descriptor": "WALGREENS 06112  EL PASO  TX",
+       "statement_category": "Merchandise & Supplies-Groceries",
+       "reward_category": "other", "amount": 47.85},
+      {"date": "2026-03-10", "account": "checking", "kind": "transfer",
+       "descriptor": "CARD A ACH PMT  WEB ID: 2005032111",
+       "counterparty_account": "card_a", "discretionary": false,
+       "amount": -545.52}
+    ],
+    "cards": [
+      {"id": "card_a",
+       "rates": {"us_supermarket": 0.04, "dining": 0.04, "gas": 0.01, "other": 0.01},
+       "caps_annual": {"us_supermarket": 25000}},
+      {"id": "card_b",
+       "rates": {"dining": 0.03, "travel": 0.03, "other": 0.01}}
+    ],
+    "credits": [
+      {"name": "dining credit", "amount": 10.00, "period": "monthly",
+       "expires": "2026-03-31", "used": false}
+    ],
+    "fixed_liabilities_upcoming": [
+      {"name": "rent", "amount": 950.00, "due_in_days": 19}
+    ]
+  },
+  "wellness": {
+    "hrv_7d": [54, 49, null, 57, 51, 48, 53],
+    "hrv_baseline_7d": 52.0,
+    "hrv_observed": true,
+    "hrv_today": 38,
+    "sleep_hours_last": 5.4,
+    "strain_7d": 14.2,
+    "readiness_score": 41,
+    "bmr_kcal": 2105
+  },
+  "productivity": {
+    "day_start": "08:00",
+    "day_end": "18:00",
+    "meetings": [
+      {"title": "advisor sync", "start": "14:00", "duration_min": 30, "priority": "low"}
+    ],
+    "deep_work_blocks": [{"start": "09:00", "duration_min": 240}],
+    "deadlines": [{"name": "CS5390 proposal", "due_in_days": 2, "weight": 1.0}],
+    "longest_free_block_min": 360
+  },
+  "candidate_actions": [
+    {"id": "a1", "desc": "order delivery", "cost": 34.00, "time_min": 10,
+     "reward_category": "dining"},
+    {"id": "a2", "desc": "cook", "cost": 9.00, "time_min": 75,
+     "reward_category": "us_supermarket"}
+  ]
+}

@@ -1,0 +1,23 @@
+---
+description: ATO core rules — always applied
+alwaysApply: true
+---
+
+Read `AGENTS.md` before any change. `docs/SPEC.md` is the contract,
+`docs/DECISIONS.md` the rationale and open items, `TASKS.md` the work queue.
+
+These five are non-negotiable and are repeated here because missing them is
+unrecoverable:
+
+1. Never edit a fixture, an expected value, or an invariant to make a test pass.
+   A clean fixture that fails `check_state` is broken data, not a broken rule.
+2. Never weaken, delete or xfail a test under `tests/`. They are the spec.
+3. Never add any field, flag or log line to `WorldState` or `AgentVerdict` that
+   reveals whether a fault was injected.
+4. No agent framework. No LangGraph, CrewAI or AutoGen. Orchestration is a
+   hand-rolled five-call sequence.
+5. Out of scope and not to be built or stubbed: preference learning,
+   prompt-injection security, award-travel search, web scraping, any UI.
+
+One task at a time from `TASKS.md`, in order. `make check` green before done.
+If acceptance criteria are ambiguous, stop and ask rather than choosing.

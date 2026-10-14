@@ -1,0 +1,81 @@
+{
+  "scenario_id": "s021",
+  "date": "2026-04-14",
+  "fiduciary": {
+    "cycle_budget": 650.00,
+    "discretionary_remaining": 237.25,
+    "days_left_in_cycle": 16,
+    "accounts": [
+      {"id": "checking", "kind": "deposit", "balance": 1842.09},
+      {"id": "card_a", "kind": "credit", "statement_balance": 192.55},
+      {"id": "card_b", "kind": "credit", "statement_balance": 220.20}
+    ],
+    "transactions": [
+      {"date": "2026-04-01", "account": "checking", "kind": "purchase",
+       "descriptor": "HORIZON RIDGE APTS  RENT",
+       "reward_category": "other", "discretionary": false, "amount": 950.00},
+      {"date": "2026-04-02", "account": "card_b", "kind": "purchase",
+       "descriptor": "TACOS DON CUCO  EL PASO  TX",
+       "statement_category": "Restaurant-Restaurant",
+       "reward_category": "dining", "amount": 58.20},
+      {"date": "2026-04-05", "account": "card_a", "kind": "purchase",
+       "descriptor": "ALBERTSONS 0912  EL PASO  TX",
+       "statement_category": "Merchandise & Supplies-Groceries",
+       "reward_category": "us_supermarket", "amount": 131.45},
+      {"date": "2026-04-08", "account": "card_a", "kind": "purchase",
+       "descriptor": "CIRCLE K 20418  HORIZON CITY  TX",
+       "statement_category": "Merchandise & Supplies-Groceries",
+       "reward_category": "gas", "amount": 61.10},
+      {"date": "2026-04-12", "account": "card_b", "kind": "purchase",
+       "descriptor": "SPEC S WINE SPIRITS  EL PASO  TX",
+       "statement_category": "Merchandise & Supplies-Groceries",
+       "reward_category": "other", "amount": 162.00},
+      {"date": "2026-04-10", "account": "checking", "kind": "transfer",
+       "descriptor": "CARD B ACH PMT  WEB ID: 2005032111",
+       "counterparty_account": "card_b", "discretionary": false,
+       "amount": -300.00}
+    ],
+    "cards": [
+      {"id": "card_a",
+       "rates": {"us_supermarket": 0.04, "dining": 0.04, "gas": 0.01, "other": 0.01},
+       "caps_annual": {"us_supermarket": 25000}},
+      {"id": "card_b",
+       "rates": {"dining": 0.03, "travel": 0.03, "other": 0.01}}
+    ],
+    "credits": [
+      {"name": "dining credit", "amount": 10.00, "period": "monthly",
+       "expires": "2026-04-30", "used": true}
+    ],
+    "fixed_liabilities_upcoming": [
+      {"name": "rent", "amount": 950.00, "due_in_days": 17}
+    ]
+  },
+  "wellness": {
+    "hrv_7d": [47, null, 51, 44, null, 49, 53],
+    "hrv_baseline_7d": 48.8,
+    "hrv_observed": false,
+    "hrv_today": null,
+    "sleep_hours_last": 7.1,
+    "strain_7d": 9.8,
+    "readiness_score": 68,
+    "bmr_kcal": 2105
+  },
+  "productivity": {
+    "day_start": "08:00",
+    "day_end": "18:00",
+    "meetings": [
+      {"title": "standup", "start": "09:00", "duration_min": 15, "priority": "low"},
+      {"title": "design review", "start": "11:00", "duration_min": 60, "priority": "high"},
+      {"title": "1:1", "start": "15:30", "duration_min": 30, "priority": "medium"}
+    ],
+    "deep_work_blocks": [{"start": "12:00", "duration_min": 180}],
+    "deadlines": [{"name": "ATO schema freeze", "due_in_days": 1, "weight": 1.0}],
+    "longest_free_block_min": 210
+  },
+  "candidate_actions": [
+    {"id": "a1", "desc": "order delivery", "cost": 28.00, "time_min": 10,
+     "reward_category": "dining"},
+    {"id": "a2", "desc": "cook", "cost": 11.50, "time_min": 60,
+     "reward_category": "us_supermarket"}
+  ]
+}
