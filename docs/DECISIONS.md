@@ -98,6 +98,15 @@ valid stability floor, arguably a better one since it measures the
 nondeterminism the system actually faces, but every mention must say
 resampling rather than reseeding.
 
+## D11 — An empty HRV window has no baseline · settled
+
+W1 is the mean of observed days. A window of all non-wear days has no mean, so
+`hrv_baseline_7d` is null rather than a placeholder number. Presence is a shape
+rule: null exactly when no day in `hrv_7d` was observed. The value, when
+present, stays a W1 check. `d_wel_baseline` applies only where that redundancy
+exists. An empty window is a clean state, and shifting a number that is not
+there is not a detectable wellness fault.
+
 ---
 
 ## OPEN-1 — Does the Fiduciary agent hold `reconcile`? · open, leaning

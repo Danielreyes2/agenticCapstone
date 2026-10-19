@@ -1,0 +1,65 @@
+{
+  "scenario_id": "s028",
+  "date": "2026-10-02",
+  "fiduciary": {
+    "cycle_budget": 480.00,
+    "discretionary_remaining": 365.85,
+    "days_left_in_cycle": 13,
+    "accounts": [
+      {"id": "checking", "kind": "deposit", "balance": 2488.10},
+      {"id": "card_a", "kind": "credit", "statement_balance": 82.40},
+      {"id": "card_b", "kind": "credit", "statement_balance": 31.75}
+    ],
+    "transactions": [
+      {"date": "2026-09-24", "account": "card_a", "kind": "purchase",
+       "descriptor": "UTEP BOOKSTORE  EL PASO  TX",
+       "statement_category": "Merchandise & Supplies-Books",
+       "reward_category": "other", "amount": 24.00},
+      {"date": "2026-09-26", "account": "card_b", "kind": "purchase",
+       "descriptor": "CRAVE KITCHEN  EL PASO  TX",
+       "statement_category": "Restaurant-Restaurant",
+       "reward_category": "dining", "amount": 31.75},
+      {"date": "2026-09-30", "account": "card_a", "kind": "purchase",
+       "descriptor": "SKINNY'S MARKET  EL PASO  TX",
+       "statement_category": "Merchandise & Supplies-Groceries",
+       "reward_category": "us_supermarket", "amount": 58.40}
+    ],
+    "cards": [
+      {"id": "card_a",
+       "rates": {"us_supermarket": 0.04, "other": 0.01},
+       "caps_annual": {"us_supermarket": 4000}},
+      {"id": "card_b",
+       "rates": {"dining": 0.03, "other": 0.01}}
+    ],
+    "credits": [],
+    "fixed_liabilities_upcoming": [
+      {"name": "semester fee", "amount": 400.00, "due_in_days": 20}
+    ]
+  },
+  "wellness": {
+    "hrv_7d": [null, null, null, null, null, null, null],
+    "hrv_baseline_7d": null,
+    "hrv_observed": false,
+    "hrv_today": null,
+    "sleep_hours_last": 8.0,
+    "strain_7d": 6.2,
+    "readiness_score": 80,
+    "bmr_kcal": 2105
+  },
+  "productivity": {
+    "day_start": "08:00",
+    "day_end": "18:00",
+    "meetings": [
+      {"title": "errand", "start": "11:00", "duration_min": 30, "priority": "low"}
+    ],
+    "deep_work_blocks": [{"start": "09:00", "duration_min": 90}],
+    "deadlines": [{"name": "reading notes", "due_in_days": 7, "weight": 0.4}],
+    "longest_free_block_min": 390
+  },
+  "candidate_actions": [
+    {"id": "a1", "desc": "library afternoon", "cost": 0.00, "time_min": 120,
+     "reward_category": null},
+    {"id": "a2", "desc": "soup from the co-op", "cost": 9.00, "time_min": 20,
+     "reward_category": "dining"}
+  ]
+}

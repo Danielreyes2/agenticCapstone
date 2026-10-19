@@ -1,0 +1,66 @@
+{
+  "scenario_id": "s019",
+  "date": "2026-05-20",
+  "fiduciary": {
+    "cycle_budget": 275.00,
+    "discretionary_remaining": 0.00,
+    "days_left_in_cycle": 4,
+    "accounts": [
+      {"id": "checking", "kind": "deposit", "balance": 640.33},
+      {"id": "card_a", "kind": "credit", "statement_balance": 188.75},
+      {"id": "card_b", "kind": "credit", "statement_balance": 86.25}
+    ],
+    "transactions": [
+      {"date": "2026-05-06", "account": "card_a", "kind": "purchase",
+       "descriptor": "CHEVRON 0308211  HORIZON CITY  TX",
+       "statement_category": "Transportation-Fuel",
+       "reward_category": "gas", "amount": 18.50},
+      {"date": "2026-05-11", "account": "card_b", "kind": "purchase",
+       "descriptor": "KIKI'S MEXICAN  EL PASO  TX",
+       "statement_category": "Restaurant-Restaurant",
+       "reward_category": "dining", "amount": 86.25},
+      {"date": "2026-05-18", "account": "card_a", "kind": "purchase",
+       "descriptor": "WALMART SUPERCENTER  EL PASO  TX",
+       "statement_category": "Merchandise & Supplies-Groceries",
+       "reward_category": "us_supermarket", "amount": 170.25}
+    ],
+    "cards": [
+      {"id": "card_a",
+       "rates": {"us_supermarket": 0.03, "gas": 0.03, "other": 0.01},
+       "caps_annual": {"gas": 500}},
+      {"id": "card_b",
+       "rates": {"dining": 0.04, "other": 0.01}}
+    ],
+    "credits": [],
+    "fixed_liabilities_upcoming": [
+      {"name": "phone", "amount": 85.00, "due_in_days": 6}
+    ]
+  },
+  "wellness": {
+    "hrv_7d": [40, 42, 38, null, 41, 39, 44],
+    "hrv_baseline_7d": 40.667,
+    "hrv_observed": true,
+    "hrv_today": 37,
+    "sleep_hours_last": 7.8,
+    "strain_7d": 8.1,
+    "readiness_score": 72,
+    "bmr_kcal": 2105
+  },
+  "productivity": {
+    "day_start": "08:00",
+    "day_end": "18:00",
+    "meetings": [
+      {"title": "lab section", "start": "09:30", "duration_min": 90, "priority": "high"},
+      {"title": "grading session", "start": "16:00", "duration_min": 90, "priority": "low"}
+    ],
+    "deep_work_blocks": [{"start": "11:15", "duration_min": 150}],
+    "deadlines": [{"name": "tuition installment", "due_in_days": 9, "weight": 1.0}],
+    "longest_free_block_min": 300
+  },
+  "candidate_actions": [
+    {"id": "a1", "desc": "walk to campus", "cost": 0.00, "time_min": 25,
+     "reward_category": null},
+    {"id": "a2", "desc": "rideshare to campus", "cost": 18.00, "time_min": 15,
+     "reward_category": "travel"}
+  ]
+}

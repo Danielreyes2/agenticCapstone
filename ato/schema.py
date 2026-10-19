@@ -116,7 +116,7 @@ class Wellness(BaseModel):
     """
 
     hrv_7d: list[float | None]
-    hrv_baseline_7d: float  # DERIVED -- checked by W1
+    hrv_baseline_7d: float | None  # DERIVED -- checked by W1 when any day was observed
     hrv_observed: bool
     hrv_today: float | None = None
     sleep_hours_last: float
@@ -132,6 +132,13 @@ class Wellness(BaseModel):
             raise ValueError("hrv_observed is true but hrv_today is null")
         if not self.hrv_observed and self.hrv_today is not None:
             raise ValueError("hrv_observed is false but hrv_today carries a value")
+        # A placeholder number would read as a real baseline. The mean exists
+        # only when some day was observed, so null and "no observations" travel together.
+        window_empty = self.observed_baseline() is None
+        if window_empty and self.hrv_baseline_7d is not None:
+            raise ValueError("hrv_baseline_7d is set but hrv_7d has no observed day")
+        if not window_empty and self.hrv_baseline_7d is None:
+            raise ValueError("hrv_baseline_7d is null but hrv_7d has an observed day")
         return self
 
     def observed_baseline(self) -> float | None:
@@ -269,15 +276,21 @@ def check_state(state: WorldState) -> list[Violation]:
         )
 
     # W1: the stated baseline must equal the mean of the observed window.
+    # An empty window has no mean; the shape rule already requires a null baseline.
     expected_base = state.wellness.observed_baseline()
-    if expected_base is not None and abs(expected_base - state.wellness.hrv_baseline_7d) > EPS:
+    stated_base = state.wellness.hrv_baseline_7d
+    if (
+        expected_base is not None
+        and stated_base is not None
+        and abs(expected_base - stated_base) > EPS
+    ):
         out.append(
             Violation(
                 agent="wellness",
                 rule="W1",
                 field="wellness.hrv_baseline_7d",
                 expected=expected_base,
-                observed=state.wellness.hrv_baseline_7d,
+                observed=stated_base,
             )
         )
 

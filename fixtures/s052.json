@@ -1,0 +1,70 @@
+{
+  "scenario_id": "s052",
+  "date": "2026-08-04",
+  "fiduciary": {
+    "cycle_budget": 360.00,
+    "discretionary_remaining": 217.85,
+    "days_left_in_cycle": 18,
+    "accounts": [
+      {"id": "checking", "kind": "deposit", "balance": 1766.40},
+      {"id": "card_a", "kind": "credit", "statement_balance": 104.55},
+      {"id": "card_b", "kind": "credit", "statement_balance": 37.60}
+    ],
+    "transactions": [
+      {"date": "2026-08-01", "account": "checking", "kind": "payment",
+       "descriptor": "AUTOPAY THANK YOU",
+       "counterparty_account": "card_a", "discretionary": false,
+       "amount": -388.17},
+      {"date": "2026-08-02", "account": "card_b", "kind": "purchase",
+       "descriptor": "SUNSET BURGER  EL PASO  TX",
+       "statement_category": "Restaurant-Bar & Café",
+       "reward_category": "dining", "amount": 37.60},
+      {"date": "2026-08-03", "account": "card_a", "kind": "purchase",
+       "descriptor": "LOVES TRAVEL STOP  EL PASO  TX",
+       "statement_category": "Merchandise & Supplies-Groceries",
+       "reward_category": "gas", "amount": 41.15},
+      {"date": "2026-08-03", "account": "card_a", "kind": "purchase",
+       "descriptor": "BIG 8 FOOD STORES  EL PASO  TX",
+       "statement_category": "Merchandise & Supplies-Groceries",
+       "reward_category": "us_supermarket", "amount": 63.40}
+    ],
+    "cards": [
+      {"id": "card_a",
+       "rates": {"us_supermarket": 0.04, "gas": 0.02, "other": 0.01},
+       "caps_annual": {"gas": 1000}},
+      {"id": "card_b",
+       "rates": {"dining": 0.03, "other": 0.01}}
+    ],
+    "credits": [],
+    "fixed_liabilities_upcoming": [
+      {"name": "gym", "amount": 35.00, "due_in_days": 10}
+    ]
+  },
+  "wellness": {
+    "hrv_7d": [55, null, 58, 54, 57, 56, 59],
+    "hrv_baseline_7d": 56.5,
+    "hrv_observed": true,
+    "hrv_today": 60,
+    "sleep_hours_last": 6.5,
+    "strain_7d": 13.3,
+    "readiness_score": 58,
+    "bmr_kcal": 2200
+  },
+  "productivity": {
+    "day_start": "08:00",
+    "day_end": "16:30",
+    "meetings": [
+      {"title": "stand-up", "start": "10:00", "duration_min": 30, "priority": "low"},
+      {"title": "code review", "start": "13:15", "duration_min": 45, "priority": "high"}
+    ],
+    "deep_work_blocks": [{"start": "10:45", "duration_min": 60}],
+    "deadlines": [{"name": "review comments", "due_in_days": 2, "weight": 1.0}],
+    "longest_free_block_min": 165
+  },
+  "candidate_actions": [
+    {"id": "a1", "desc": "pick up hardware", "cost": 24.00, "time_min": 40,
+     "reward_category": "other"},
+    {"id": "a2", "desc": "desk lunch", "cost": 9.50, "time_min": 15,
+     "reward_category": "dining"}
+  ]
+}

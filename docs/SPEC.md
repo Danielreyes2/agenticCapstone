@@ -78,7 +78,7 @@ one minute for P1.
 | Rule | Formula |
 |---|---|
 | F1 | `cycle_budget - sum(t.amount for t in transactions if t.kind == "purchase" and t.discretionary) == discretionary_remaining` |
-| W1 | `mean(v for v in hrv_7d if v is not None) == hrv_baseline_7d` |
+| W1 | `mean(v for v in hrv_7d if v is not None) == hrv_baseline_7d`. No observed day means the mean is undefined, `hrv_baseline_7d` is null, and W1 does not apply |
 | P1 | `longest_free_block(day_start, day_end, merged(meetings)) == longest_free_block_min` |
 | V1 | a verdict citing a field in `unobserved_fields(state)` must have `confidence <= 0.60` |
 

@@ -1,0 +1,72 @@
+{
+  "scenario_id": "s007",
+  "date": "2026-02-18",
+  "fiduciary": {
+    "cycle_budget": 340.00,
+    "discretionary_remaining": 30.00,
+    "days_left_in_cycle": 11,
+    "accounts": [
+      {"id": "checking", "kind": "deposit", "balance": 980.12},
+      {"id": "card_a", "kind": "credit", "statement_balance": 410.00},
+      {"id": "card_b", "kind": "credit", "statement_balance": 90.00}
+    ],
+    "transactions": [
+      {"date": "2026-02-09", "account": "card_a", "kind": "purchase",
+       "descriptor": "THE HOME DEPOT 1234  EL PASO  TX",
+       "statement_category": "Merchandise & Supplies-Hardware",
+       "reward_category": "other", "amount": 40.00},
+      {"date": "2026-02-12", "account": "card_b", "kind": "purchase",
+       "descriptor": "MESA STREET GRILL  EL PASO  TX",
+       "statement_category": "Restaurant-Restaurant",
+       "reward_category": "dining", "amount": 90.00},
+      {"date": "2026-02-16", "account": "card_a", "kind": "purchase",
+       "descriptor": "COSTCO WHSE 0682  EL PASO  TX",
+       "statement_category": "Merchandise & Supplies-Groceries",
+       "reward_category": "us_supermarket", "amount": 180.00},
+      {"date": "2026-02-17", "account": "checking", "kind": "transfer",
+       "descriptor": "CARD A ACH PMT  WEB ID: 2005032111",
+       "counterparty_account": "card_a", "discretionary": false,
+       "amount": -410.00}
+    ],
+    "cards": [
+      {"id": "card_a",
+       "rates": {"us_supermarket": 0.04, "dining": 0.03, "gas": 0.01, "other": 0.01},
+       "caps_annual": {"us_supermarket": 6000}},
+      {"id": "card_b",
+       "rates": {"dining": 0.03, "travel": 0.02, "other": 0.01}}
+    ],
+    "credits": [
+      {"name": "streaming credit", "amount": 15.00, "period": "monthly",
+       "expires": "2026-02-28", "used": false}
+    ],
+    "fixed_liabilities_upcoming": [
+      {"name": "car insurance", "amount": 140.00, "due_in_days": 12}
+    ]
+  },
+  "wellness": {
+    "hrv_7d": [62, 58, 60, 55, 59, 61, 57],
+    "hrv_baseline_7d": 58.857,
+    "hrv_observed": true,
+    "hrv_today": 44,
+    "sleep_hours_last": 6.2,
+    "strain_7d": 11.4,
+    "readiness_score": 55,
+    "bmr_kcal": 1980
+  },
+  "productivity": {
+    "day_start": "08:00",
+    "day_end": "18:00",
+    "meetings": [
+      {"title": "office hours", "start": "13:00", "duration_min": 45, "priority": "medium"}
+    ],
+    "deep_work_blocks": [{"start": "08:30", "duration_min": 120}],
+    "deadlines": [{"name": "lab report", "due_in_days": 5, "weight": 1.0}],
+    "longest_free_block_min": 300
+  },
+  "candidate_actions": [
+    {"id": "a1", "desc": "client dinner", "cost": 48.00, "time_min": 90,
+     "reward_category": "dining"},
+    {"id": "a2", "desc": "restock the pantry", "cost": 75.00, "time_min": 40,
+     "reward_category": "us_supermarket"}
+  ]
+}

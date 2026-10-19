@@ -74,6 +74,35 @@ def test_absence_is_expressible_separately_from_a_low_value(fixtures_dir: Path) 
     assert check_state(s) == []
 
 
+def test_an_empty_window_has_no_baseline(fixtures_dir: Path) -> None:
+    s = FixtureProvider(fixtures_dir).load("s028")
+    assert s.wellness.hrv_7d == [None] * 7
+    assert s.wellness.hrv_baseline_7d is None
+    assert s.wellness.observed_baseline() is None
+    assert check_state(s) == []
+
+
+@pytest.mark.parametrize(
+    "window,baseline",
+    [([None] * 7, 50.0), ([50.0] * 7, None)],
+    ids=["number-but-empty", "null-but-observed"],
+)
+def test_baseline_presence_matches_the_window(
+    window: list[float | None], baseline: float | None
+) -> None:
+    with pytest.raises(ValidationError):
+        Wellness(
+            hrv_7d=window,
+            hrv_baseline_7d=baseline,
+            hrv_observed=False,
+            hrv_today=None,
+            sleep_hours_last=7.0,
+            strain_7d=10.0,
+            readiness_score=70,
+            bmr_kcal=2100,
+        )
+
+
 def test_baseline_ignores_non_wear_days(fixtures_dir: Path) -> None:
     s = FixtureProvider(fixtures_dir).load("s021")
     observed = [v for v in s.wellness.hrv_7d if v is not None]

@@ -1,0 +1,66 @@
+{
+  "scenario_id": "s040",
+  "date": "2026-07-08",
+  "fiduciary": {
+    "cycle_budget": 450.00,
+    "discretionary_remaining": 190.50,
+    "days_left_in_cycle": 14,
+    "accounts": [
+      {"id": "checking", "kind": "deposit", "balance": 2210.00},
+      {"id": "card_a", "kind": "credit", "statement_balance": 215.50},
+      {"id": "card_b", "kind": "credit", "statement_balance": 44.00}
+    ],
+    "transactions": [
+      {"date": "2026-07-01", "account": "card_a", "kind": "purchase",
+       "descriptor": "FOOD KING 14  EL PASO  TX",
+       "statement_category": "Merchandise & Supplies-Groceries",
+       "reward_category": "us_supermarket", "amount": 120.00},
+      {"date": "2026-07-03", "account": "card_b", "kind": "purchase",
+       "descriptor": "LOTA CAFE  EL PASO  TX",
+       "statement_category": "Restaurant-Restaurant",
+       "reward_category": "dining", "amount": 44.00},
+      {"date": "2026-07-06", "account": "card_a", "kind": "purchase",
+       "descriptor": "FOOD KING 14  EL PASO  TX",
+       "statement_category": "Merchandise & Supplies-Groceries",
+       "reward_category": "us_supermarket", "amount": 95.50}
+    ],
+    "cards": [
+      {"id": "card_a",
+       "rates": {"us_supermarket": 0.06, "dining": 0.03, "other": 0.01},
+       "caps_annual": {"us_supermarket": 200}},
+      {"id": "card_b",
+       "rates": {"us_supermarket": 0.02, "dining": 0.04, "other": 0.01},
+       "caps_annual": {"us_supermarket": 15000}}
+    ],
+    "credits": [],
+    "fixed_liabilities_upcoming": [
+      {"name": "renters insurance", "amount": 22.00, "due_in_days": 11}
+    ]
+  },
+  "wellness": {
+    "hrv_7d": [33, 36, 35, 34, 38, null, 37],
+    "hrv_baseline_7d": 35.5,
+    "hrv_observed": true,
+    "hrv_today": 34,
+    "sleep_hours_last": 6.9,
+    "strain_7d": 12.7,
+    "readiness_score": 61,
+    "bmr_kcal": 2140
+  },
+  "productivity": {
+    "day_start": "08:00",
+    "day_end": "17:00",
+    "meetings": [
+      {"title": "supplier call", "start": "12:00", "duration_min": 60, "priority": "medium"}
+    ],
+    "deep_work_blocks": [{"start": "09:00", "duration_min": 90}],
+    "deadlines": [{"name": "order the parts", "due_in_days": 6, "weight": 0.5}],
+    "longest_free_block_min": 240
+  },
+  "candidate_actions": [
+    {"id": "a1", "desc": "grocery run", "cost": 40.00, "time_min": 50,
+     "reward_category": "us_supermarket"},
+    {"id": "a2", "desc": "coffee with the order", "cost": 6.00, "time_min": 15,
+     "reward_category": "dining"}
+  ]
+}

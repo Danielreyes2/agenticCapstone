@@ -1,0 +1,70 @@
+{
+  "scenario_id": "s044",
+  "date": "2026-06-09",
+  "fiduciary": {
+    "cycle_budget": 610.00,
+    "discretionary_remaining": 441.05,
+    "days_left_in_cycle": 21,
+    "accounts": [
+      {"id": "checking", "kind": "deposit", "balance": 1544.20},
+      {"id": "card_a", "kind": "credit", "statement_balance": 114.20},
+      {"id": "card_b", "kind": "credit", "statement_balance": 54.75}
+    ],
+    "transactions": [
+      {"date": "2026-06-02", "account": "card_a", "kind": "purchase",
+       "descriptor": "SUN METRO PASSES  EL PASO  TX",
+       "statement_category": "Transportation-Transit",
+       "reward_category": "other", "amount": 26.00},
+      {"date": "2026-06-04", "account": "card_b", "kind": "purchase",
+       "descriptor": "ELEMI  EL PASO  TX",
+       "statement_category": "Restaurant-Restaurant",
+       "reward_category": "dining", "amount": 54.75},
+      {"date": "2026-06-07", "account": "card_a", "kind": "purchase",
+       "descriptor": "MESA FARMERS MARKET  EL PASO  TX",
+       "statement_category": "Merchandise & Supplies-Groceries",
+       "reward_category": "us_supermarket", "amount": 88.20}
+    ],
+    "cards": [
+      {"id": "card_a",
+       "rates": {"us_supermarket": 0.04, "other": 0.01},
+       "caps_annual": {"us_supermarket": 3000}},
+      {"id": "card_b",
+       "rates": {"dining": 0.04, "travel": 0.02, "other": 0.01}}
+    ],
+    "credits": [
+      {"name": "rideshare credit", "amount": 10.00, "period": "monthly",
+       "expires": "2026-05-31", "used": false},
+      {"name": "dining credit", "amount": 10.00, "period": "monthly",
+       "expires": "2026-06-30", "used": false}
+    ],
+    "fixed_liabilities_upcoming": [
+      {"name": "storage unit", "amount": 45.00, "due_in_days": 15}
+    ]
+  },
+  "wellness": {
+    "hrv_7d": [70, 68, 72, 69, 71, 67, 73],
+    "hrv_baseline_7d": 70.0,
+    "hrv_observed": true,
+    "hrv_today": 66,
+    "sleep_hours_last": 8.1,
+    "strain_7d": 7.4,
+    "readiness_score": 81,
+    "bmr_kcal": 1920
+  },
+  "productivity": {
+    "day_start": "09:00",
+    "day_end": "17:30",
+    "meetings": [
+      {"title": "committee", "start": "14:00", "duration_min": 45, "priority": "medium"}
+    ],
+    "deep_work_blocks": [{"start": "09:30", "duration_min": 180}],
+    "deadlines": [{"name": "fellowship letter", "due_in_days": 12, "weight": 1.0}],
+    "longest_free_block_min": 300
+  },
+  "candidate_actions": [
+    {"id": "a1", "desc": "take the streetcar", "cost": 2.00, "time_min": 35,
+     "reward_category": "other"},
+    {"id": "a2", "desc": "lunch before committee", "cost": 16.00, "time_min": 40,
+     "reward_category": "dining"}
+  ]
+}

@@ -11,10 +11,19 @@ Do not weaken, skip or xfail anything in this file.
 from __future__ import annotations
 
 import itertools
+from pathlib import Path
 
 import pytest
 
-from ato.faults import LIBRARY, FaultSpec, inject_output_fault, inject_state_fault, library
+from ato.faults import (
+    LIBRARY,
+    FaultSpec,
+    applies_to,
+    inject_output_fault,
+    inject_state_fault,
+    library,
+)
+from ato.provider import FixtureProvider
 from ato.schema import AgentVerdict, WorldState, check_state, check_verdicts
 
 STATE_SPECS = [s for s in LIBRARY if s.surface == "state"]
@@ -29,7 +38,9 @@ def _ids(spec: FaultSpec) -> str:
 
 @pytest.mark.parametrize("spec", library(tier="detectable"), ids=_ids)
 def test_detectable_faults_break_an_invariant(all_clean: list[WorldState], spec: FaultSpec) -> None:
-    for state in all_clean:
+    applicable = [state for state in all_clean if applies_to(spec, state)]
+    assert applicable, f"{spec.fault_id} applies to no fixture"
+    for state in applicable:
         faulted, record = inject_state_fault(state, spec)
         violations = check_state(faulted)
         assert violations, (
@@ -48,6 +59,14 @@ def test_undetectable_faults_break_nothing(all_clean: list[WorldState], spec: Fa
         assert check_state(faulted) == [], (
             f"{spec.fault_id} is localizable in {state.scenario_id}; it cannot serve as the control"
         )
+
+
+def test_baseline_drift_does_not_apply_to_an_empty_window(fixtures_dir: Path) -> None:
+    empty = FixtureProvider(fixtures_dir).load("s028")
+    spec = next(s for s in LIBRARY if s.fault_id == "d_wel_baseline")
+    assert applies_to(spec, empty) is False
+    observed = FixtureProvider(fixtures_dir).load("s014")
+    assert applies_to(spec, observed) is True
 
 
 def test_control_is_balanced_across_agents() -> None:

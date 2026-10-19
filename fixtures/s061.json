@@ -1,0 +1,66 @@
+{
+  "scenario_id": "s061",
+  "date": "2026-09-15",
+  "fiduciary": {
+    "cycle_budget": 250.00,
+    "discretionary_remaining": 153.85,
+    "days_left_in_cycle": 7,
+    "accounts": [
+      {"id": "checking", "kind": "deposit", "balance": 890.00},
+      {"id": "card_a", "kind": "credit", "statement_balance": 67.75},
+      {"id": "card_b", "kind": "credit", "statement_balance": 28.40}
+    ],
+    "transactions": [
+      {"date": "2026-09-09", "account": "card_a", "kind": "purchase",
+       "descriptor": "CAMPUS COFFEE  EL PASO  TX",
+       "statement_category": "Restaurant-Bar & Café",
+       "reward_category": "dining", "amount": 15.00},
+      {"date": "2026-09-11", "account": "card_b", "kind": "purchase",
+       "descriptor": "NOODLE BAR  EL PASO  TX",
+       "statement_category": "Restaurant-Restaurant",
+       "reward_category": "dining", "amount": 28.40},
+      {"date": "2026-09-14", "account": "card_a", "kind": "purchase",
+       "descriptor": "WINCO FOODS  EL PASO  TX",
+       "statement_category": "Merchandise & Supplies-Groceries",
+       "reward_category": "us_supermarket", "amount": 52.75}
+    ],
+    "cards": [
+      {"id": "card_a",
+       "rates": {"us_supermarket": 0.03, "dining": 0.02, "other": 0.01}},
+      {"id": "card_b",
+       "rates": {"dining": 0.04, "other": 0.01}}
+    ],
+    "credits": [],
+    "fixed_liabilities_upcoming": [
+      {"name": "parking permit", "amount": 60.00, "due_in_days": 4}
+    ]
+  },
+  "wellness": {
+    "hrv_7d": [28, 30, 29, 31, 27, 32, 26],
+    "hrv_baseline_7d": 29.0,
+    "hrv_observed": true,
+    "hrv_today": 25,
+    "sleep_hours_last": 5.1,
+    "strain_7d": 16.8,
+    "readiness_score": 39,
+    "bmr_kcal": 2075
+  },
+  "productivity": {
+    "day_start": "08:00",
+    "day_end": "18:00",
+    "meetings": [
+      {"title": "defense rehearsal", "start": "08:00", "duration_min": 180, "priority": "high"},
+      {"title": "committee questions", "start": "11:20", "duration_min": 200, "priority": "high"},
+      {"title": "reception setup", "start": "15:00", "duration_min": 180, "priority": "medium"}
+    ],
+    "deep_work_blocks": [],
+    "deadlines": [{"name": "proposal defense", "due_in_days": 0, "weight": 1.0}],
+    "longest_free_block_min": 20
+  },
+  "candidate_actions": [
+    {"id": "a1", "desc": "revise the slides", "cost": 8.00, "time_min": 45,
+     "reward_category": "other"},
+    {"id": "a2", "desc": "reprint the packet", "cost": 11.00, "time_min": 60,
+     "reward_category": "other"}
+  ]
+}

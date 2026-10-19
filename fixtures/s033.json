@@ -1,0 +1,67 @@
+{
+  "scenario_id": "s033",
+  "date": "2026-01-27",
+  "fiduciary": {
+    "cycle_budget": 520.00,
+    "discretionary_remaining": 397.50,
+    "days_left_in_cycle": 19,
+    "accounts": [
+      {"id": "checking", "kind": "deposit", "balance": 3104.80},
+      {"id": "card_a", "kind": "credit", "statement_balance": 100.10},
+      {"id": "card_b", "kind": "credit", "statement_balance": 22.40}
+    ],
+    "transactions": [
+      {"date": "2026-01-20", "account": "card_a", "kind": "purchase",
+       "descriptor": "UTEP BOOKSTORE  EL PASO  TX",
+       "statement_category": "Merchandise & Supplies-Books",
+       "reward_category": "other", "amount": 36.00},
+      {"date": "2026-01-22", "account": "card_b", "kind": "purchase",
+       "descriptor": "CAFE MAYAPAN  EL PASO  TX",
+       "statement_category": "Restaurant-Restaurant",
+       "reward_category": "dining", "amount": 22.40},
+      {"date": "2026-01-25", "account": "card_a", "kind": "purchase",
+       "descriptor": "RIO GRANDE MARKET  EL PASO  TX",
+       "statement_category": "Merchandise & Supplies-Groceries",
+       "reward_category": "us_supermarket", "amount": 64.10}
+    ],
+    "cards": [
+      {"id": "card_a",
+       "rates": {"us_supermarket": 0.05, "other": 0.01},
+       "caps_annual": {"us_supermarket": 1500}},
+      {"id": "card_b",
+       "rates": {"dining": 0.03, "other": 0.01}}
+    ],
+    "credits": [],
+    "fixed_liabilities_upcoming": [
+      {"name": "utilities", "amount": 96.00, "due_in_days": 8}
+    ]
+  },
+  "wellness": {
+    "hrv_7d": [46, 50, 48, 52, 49, 51, 47],
+    "hrv_baseline_7d": 49.0,
+    "hrv_observed": true,
+    "hrv_today": 50,
+    "sleep_hours_last": 7.4,
+    "strain_7d": 10.6,
+    "readiness_score": 74,
+    "bmr_kcal": 2050
+  },
+  "productivity": {
+    "day_start": "07:30",
+    "day_end": "19:00",
+    "meetings": [
+      {"title": "studio critique", "start": "09:00", "duration_min": 120, "priority": "high"},
+      {"title": "section workshop", "start": "10:00", "duration_min": 90, "priority": "high"},
+      {"title": "mail run", "start": "15:00", "duration_min": 30, "priority": "low"}
+    ],
+    "deep_work_blocks": [{"start": "12:00", "duration_min": 90}],
+    "deadlines": [{"name": "critique slides", "due_in_days": 3, "weight": 1.0}],
+    "longest_free_block_min": 210
+  },
+  "candidate_actions": [
+    {"id": "a1", "desc": "print the boards", "cost": 12.00, "time_min": 30,
+     "reward_category": "other"},
+    {"id": "a2", "desc": "eat at the studio", "cost": 8.00, "time_min": 20,
+     "reward_category": "dining"}
+  ]
+}

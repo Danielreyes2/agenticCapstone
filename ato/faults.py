@@ -102,6 +102,17 @@ def _apply(before: float, op: str, magnitude: float) -> float:
 # --------------------------------------------------------------------------
 
 
+def applies_to(spec: FaultSpec, state: WorldState) -> bool:
+    """Whether this spec has a redundancy to break on `state`.
+
+    `d_wel_baseline` shifts a derived mean. A window with no observed day has
+    no mean, so the shift is not a wellness fault there.
+    """
+    if spec.target_path == "wellness.hrv_baseline_7d":
+        return state.wellness.observed_baseline() is not None
+    return True
+
+
 def inject_state_fault(state: WorldState, spec: FaultSpec) -> tuple[WorldState, FaultRecord]:
     if spec.surface != "state":
         raise ValueError(f"{spec.fault_id} is an output fault")
