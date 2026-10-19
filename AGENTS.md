@@ -93,7 +93,9 @@ Provider -> Fault injector -> 3 agents -> Arbiter -> Blame call -> Gate
 ## Working rules
 
 - One task from `TASKS.md` at a time, in order. Each ends with the full suite
-  green and a commit.
+  green and the changes left unstaged for my review. Never run a git write
+  command: no commit, no add, no branch, no tag. I handle all version control
+  myself.
 - Write the test before the implementation where the task has acceptance
   criteria stated as a test.
 - Do not refactor files the current task does not name.

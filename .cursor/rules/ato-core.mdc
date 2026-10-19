@@ -18,6 +18,8 @@ unrecoverable:
    hand-rolled five-call sequence.
 5. Out of scope and not to be built or stubbed: preference learning,
    prompt-injection security, award-travel search, web scraping, any UI.
+6. Never run a git write command (commit, add, branch, tag, push). Leave
+   changes unstaged; the human commits.
 
 One task at a time from `TASKS.md`, in order. `make check` green before done.
 If acceptance criteria are ambiguous, stop and ask rather than choosing.

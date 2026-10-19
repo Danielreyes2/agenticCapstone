@@ -1,6 +1,6 @@
 # Work queue
 
-One at a time, in order. Each ends with `make check` green and a commit. Do not
+One at a time, in order. Each ends with `make check` green and the changes left for my review. Do not
 start a task while the one above it is unfinished. If acceptance criteria are
 ambiguous, stop and ask rather than choosing an interpretation.
 
@@ -29,7 +29,7 @@ change their shapes; everything downstream is written against them.
   not change the cache key.
 - `CachingClient` wrapper: content-addressed on
   `sha256(model | temperature | seed | serialized messages | response_model name)`,
-  stored under `.cache/llm/`. A cache hit must be byte-identical to the miss.
+  stored under `.cache/llm/`. A cache hit matches the miss in every field except `from_cache=True`.
 - Structured output: a verdict is parsed into `AgentVerdict` with Pydantic.
   On a parse failure, retry once with the validation error appended, then record
   a schema-validity failure and return `None`. Never silently coerce.
@@ -143,11 +143,11 @@ human reading the numbers.
 **Run**
 - Ten hand-written scenarios, Fiduciary agent only, arbiter asked to attribute
   blame on five faulted and five clean runs.
-- Five reseeded runs of each clean scenario for the stability floor.
+- Five resampled runs of each clean scenario for the stability floor.
 
 **Report**
 - Blame attribution: does it discriminate above the C0 chance floor?
-- Decision stability across reseeds — target above 80%.
+- Decision stability across resamples — target above 80%.
 - The per-agent distribution of blame attributions on clean runs (the arbiter's
   standing prior).
 - False-positive rate: how often it names someone on a clean run.

@@ -151,11 +151,12 @@ mislabeled during scenario authoring fails CI.
 | Decision flip rate | fraction of faulted runs whose chosen action differs from the paired clean run |
 | Hard-constraint violation rate | fraction of runs whose chosen action breaks a stated budget, sleep or deadline constraint |
 | Schema validity rate | fraction of agent calls returning parseable, valid output |
-| Decision stability | agreement across 5 reseeded runs of an identical clean scenario |
+| Decision stability | agreement across 5 resampled runs of an identical clean scenario |
 
-**Decision stability is measured first.** If unfaulted scenarios produce
-different decisions at a high rate, no fault effect below that rate is
-interpretable.
+**Decision stability is measured first.** A resample is an independent sample,
+not a new seed: the provider accepts no seed, and a recorded run is reproduced
+from the response cache. If unfaulted scenarios produce different decisions at
+a high rate, no fault effect below that rate is interpretable.
 
 **Two results, not one number.** State faults have answer space
 `(agent, WorldState field)`; output faults have answer space

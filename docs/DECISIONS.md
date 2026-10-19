@@ -89,6 +89,15 @@ Preference learning, prompt-injection security, award-travel search. All three
 are out, and none gets a stub or a "room for later" abstraction. The confirmation
 log is written from day one; nothing is modeled from it.
 
+## D10 — No provider-level seeded determinism · settled
+
+The Anthropic Messages API takes no seed. Reproducibility comes from the
+response cache, not from the model. "Five reseeded runs" in SPEC section 5
+therefore means five independent samples, not five seeds. That is still a
+valid stability floor, arguably a better one since it measures the
+nondeterminism the system actually faces, but every mention must say
+resampling rather than reseeding.
+
 ---
 
 ## OPEN-1 — Does the Fiduciary agent hold `reconcile`? · open, leaning
