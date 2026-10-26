@@ -187,8 +187,9 @@ Condition A is the first thing to cut under time pressure.
 
 ## 7. Run protocol
 
-- Every scenario runs **clean and faulted with the same seed**. The delta is the
-  measurement. A fault that changes nothing is recorded, not discarded.
+- Every scenario runs **clean and faulted with the same seed**. Both rows store
+  `pair_key` as `{scenario_id}:{seed}`. The delta is the measurement. A fault
+  that changes nothing is recorded, not discarded.
 - **Temperature must be pinned and recorded in the run log.** It sets the noise
   floor, which everything else is scoped against. Default 0.0; run a temperature
   sweep as a secondary condition rather than leaving it implicit.

@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -121,12 +122,23 @@ def attribute_blame(
     temperature: float,
     seed: int,
     max_tokens: int,
+    surface_evidence: bool = False,
 ) -> BlameAttribution:
-    """Ask who was wrong after the choice exists. This function returns no decision."""
-    payload = {
+    """Ask who was wrong after the choice exists. This function returns no decision.
+
+    `surface_evidence` is condition D. The paths are copied out of the verdicts
+    into their own field so provenance is not only buried inside them. The
+    decision object is not revised either way.
+    """
+    payload: dict[str, Any] = {
         "committed_action_id": decision.action_id,
         "verdicts": [verdict.model_dump(mode="json") for verdict in verdicts],
     }
+    if surface_evidence:
+        payload["evidence"] = [
+            {"agent": verdict.agent, "action_id": verdict.action_id, "evidence": verdict.evidence}
+            for verdict in verdicts
+        ]
     result = complete_structured(
         client,
         [
