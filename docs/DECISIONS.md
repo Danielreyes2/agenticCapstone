@@ -109,6 +109,17 @@ there is not a detectable wellness fault.
 
 ---
 
+## D12 — Arbiter weights are equal until readiness drops below 50 · settled
+
+The proposal says the weights are hand-set and that wellness rises when
+readiness drops below a threshold. It names neither the numbers nor the
+threshold. Settled: each domain weighs 1/3 while `readiness_score` is 50 or
+above. Below 50, wellness weighs 0.5 and the other two weigh 0.25. The shift
+is a fixed function of the state. An agent that did not score an action
+contributes 0, so a missing domain is not renormalized into the others. Equal
+utilities keep the earlier candidate, so the choice does not depend on dict
+order.
+
 ## OPEN-1 — Does the Fiduciary agent hold `reconcile`? · open, leaning
 
 If the agent reconciles on every run, a detectable drift fault is caught at the

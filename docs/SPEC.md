@@ -210,9 +210,10 @@ Condition A is the first thing to cut under time pressure.
 
 Hard violations are checked first and are not tradeable: any action flagged by
 any agent is eliminated before scoring. Surviving actions are scored
-`U(a) = w_f·s_f(a) + w_w·s_w(a) + w_p·s_p(a)`, weights hand-set and
-state-conditioned. The weights exist to make the decision inspectable; learning
-them is explicitly not a contribution.
+`U(a) = w_f·s_f(a) + w_w·s_w(a) + w_p·s_p(a)`. Each weight is 1/3 while
+`wellness.readiness_score` is 50 or above. Below 50, `w_w` is 0.5 and `w_f`
+and `w_p` are 0.25. An agent with no verdict for an action contributes 0 for
+that term. Equal utilities keep the earlier candidate action.
 
 ## 8. Scenario suite
 
