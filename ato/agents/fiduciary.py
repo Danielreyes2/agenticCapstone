@@ -114,11 +114,25 @@ def _system(reconcile: bool) -> str:
     if reconcile:
         tools.append("reconcile")
     listed = ", ".join(tools)
+    # The schema is spelled out because a model left to guess wrote its own
+    # keys, and a batch that fails validation leaves the arbiter nothing to score.
     return (
         "You are the fiduciary agent. You see only the fiduciary slice and the "
-        "candidate actions. Reply with JSON only. Either "
+        "candidate actions. Reply with JSON only, no prose, no code fence. Either "
         f'{{"tool": one of {listed}, "args": {{}}}} or '
-        '{"verdicts": [one verdict per candidate action]}. '
+        '{"verdicts": [...]} with exactly one verdict per candidate action. '
+        "Each verdict is an object with exactly these keys and no others: "
+        '"agent": "fiduciary"; '
+        '"action_id": the candidate action id; '
+        '"score": a number from -1 to 1, this domain\'s view of the action; '
+        '"hard_violation": true only if the action breaks a non-negotiable '
+        "money constraint; "
+        '"confidence": a number from 0 to 1; '
+        '"rationale": at most 280 characters; '
+        '"evidence": a non-empty list of the dotted paths you relied on, each a '
+        "path in the slice you were shown, written like "
+        "fiduciary.cards[0].rates.dining; "
+        '"input_anomaly": null. '
         "Do not describe a numeric discrepancy in the rationale."
     )
 

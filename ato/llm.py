@@ -12,6 +12,7 @@ validity is a reported metric that needs an attempt count.
 from __future__ import annotations
 
 import hashlib
+import inspect
 import json
 import os
 from collections.abc import Sequence
@@ -370,6 +371,28 @@ def _message_text(response: Any) -> str:
     return "".join(parts)
 
 
+def _accepts(func: Any, name: str) -> bool:
+    try:
+        parameters = inspect.signature(func).parameters.values()
+    except (TypeError, ValueError):
+        return False
+    return any(p.name == name or p.kind is p.VAR_KEYWORD for p in parameters)
+
+
+def temperature_sent(client: LLMClient, temperature: float) -> float | None:
+    """The temperature the provider actually received, or None if it received none.
+
+    A fake client and an SDK without the argument both answer None, so the log
+    never claims a temperature was pinned when it was not.
+    """
+    inner: Any = client
+    while hasattr(inner, "inner"):
+        inner = inner.inner
+    if isinstance(inner, AnthropicClient) and inner.sends_temperature:
+        return temperature
+    return None
+
+
 class AnthropicClient:
     """The only vendor SDK import in the repo lives in this class.
 
@@ -379,12 +402,13 @@ class AnthropicClient:
 
     def __init__(self, client: Any | None = None) -> None:
         if client is None:
-            import anthropic  # type: ignore[import-not-found]
+            import anthropic  # type: ignore[import-not-found, unused-ignore]
 
             # Default max_retries is the SDK's own backoff on this same request.
             # The cache key is the request, so a transport retry cannot change it.
             client = anthropic.Anthropic()
         self._client = client
+        self.sends_temperature = _accepts(client.messages.create, "temperature")
 
     def complete(
         self,
@@ -400,9 +424,12 @@ class AnthropicClient:
         kwargs: dict[str, Any] = {
             "model": model,
             "max_tokens": max_tokens,
-            "temperature": temperature,
             "messages": [{"role": message.role, "content": message.content} for message in chat],
         }
+        # Some SDK versions take no temperature (D13). The requested value still
+        # keys the cache; the run log records separately whether it was sent.
+        if self.sends_temperature:
+            kwargs["temperature"] = temperature
         if system is not None:
             kwargs["system"] = system
         sdk_response = self._client.messages.create(**kwargs)

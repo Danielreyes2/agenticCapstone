@@ -120,6 +120,23 @@ contributes 0, so a missing domain is not renormalized into the others. Equal
 utilities keep the earlier candidate, so the choice does not depend on dict
 order.
 
+## D13 — The log records the temperature that was sent, not only the one asked for · settled
+
+OPEN-3 set 0.0 as the default. The installed `anthropic` SDK's
+`messages.create` takes no temperature argument, so the first gate logged 0.0
+on every row while the model sampled at the provider default. A row that
+claims a pinned temperature it never had would misstate the stability floor.
+
+Settled: `temperature` stays the requested value and still keys the response
+cache. `temperature_sent` records what reached the provider. `AnthropicClient`
+inspects the SDK call signature once and sends the value only if the call
+accepts it. When it does not, and for any fake client, `temperature_sent` is
+null. On this model and SDK temperature cannot be pinned, so the stability
+floor is the model's default sampling and no result may claim temperature 0.
+This settles the logging half of OPEN-3; whether to sweep temperature on a
+model that takes it stays open. Consistent with D10: reproducibility is the
+cache, not the sampler.
+
 ## OPEN-1 — Does the Fiduciary agent hold `reconcile`? · open, leaning
 
 If the agent reconciles on every run, a detectable drift fault is caught at the

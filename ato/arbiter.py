@@ -14,8 +14,9 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from ato.llm import LLMClient, Message, complete_structured
-from ato.schema import AgentName, AgentVerdict, WorldState
+from ato.agents.base import BoundedLoop
+from ato.llm import LLMClient, Message
+from ato.schema import AgentName, AgentVerdict, WorldState, check_state
 
 MAX_ROUNDS = 3
 SCORE_MOVE = 0.1
@@ -41,8 +42,8 @@ class Decision(BaseModel):
 class BlameAttribution(BaseModel):
     """The second call's answer: an agent, a field, and a confidence.
 
-    `parse_failed` is set here when the model never produced that object. It is
-    a property of the call, not of the world.
+    `parse_failed`, `reconcile_called` and `refused` describe the call, not the
+    world. None of them is derived from whether a fault was injected.
     """
 
     model_config = {"extra": "forbid"}
@@ -51,6 +52,44 @@ class BlameAttribution(BaseModel):
     field: str | None = None
     confidence: float = Field(default=0.0, ge=0.0, le=1.0)
     parse_failed: bool = False
+    reconcile_called: bool = False
+    refused: bool = False
+
+
+class _BlameAnswer(BaseModel):
+    """What the model may write. The call-level flags are not its to set."""
+
+    model_config = {"extra": "forbid"}
+
+    agent: AgentName | None
+    field: str | None
+    confidence: float = Field(ge=0.0, le=1.0)
+
+
+_SLICES = ("fiduciary", "wellness", "productivity")
+
+
+def field_paths(state: WorldState) -> list[str]:
+    """Every leaf path in the three domain slices, in the syntax `read_path` reads.
+
+    This is the answer space. It is built from the structure, which a fault
+    never changes, so a faulted state yields the same list as its clean twin.
+    """
+    paths: list[str] = []
+    for name in _SLICES:
+        _leaves(getattr(state, name).model_dump(mode="json"), name, paths)
+    return paths
+
+
+def _leaves(node: Any, prefix: str, out: list[str]) -> None:
+    if isinstance(node, dict):
+        for key, value in node.items():
+            _leaves(value, f"{prefix}.{key}", out)
+    elif isinstance(node, list):
+        for index, value in enumerate(node):
+            _leaves(value, f"{prefix}[{index}]", out)
+    else:
+        out.append(prefix)
 
 
 @dataclass(frozen=True)
@@ -113,7 +152,22 @@ def arbitrate(
     )
 
 
+_BLAME_SYSTEM = (
+    "The action is already committed and will not change. You are given the full "
+    "WorldState the agents worked from, their verdicts, and field_paths, the list "
+    "of every WorldState field. If this decision were wrong because an input was "
+    "wrong, name the agent whose input is most likely responsible and exactly one "
+    "path from field_paths that belongs to that agent. If no input looks wrong, "
+    "answer with agent null and field null. Before answering you may call one tool: "
+    '{"tool": "reconcile", "args": {}} returns a check of each derived value '
+    "against the data it is derived from. The final answer is JSON only, with "
+    'exactly the keys "agent", "field" and "confidence" (0 to 1). '
+    "No prose, no code fence."
+)
+
+
 def attribute_blame(
+    state: WorldState,
     verdicts: Sequence[AgentVerdict],
     decision: Decision,
     *,
@@ -123,43 +177,62 @@ def attribute_blame(
     seed: int,
     max_tokens: int,
     surface_evidence: bool = False,
+    token_budget: int = 20000,
 ) -> BlameAttribution:
     """Ask who was wrong after the choice exists. This function returns no decision.
 
-    `surface_evidence` is condition D. The paths are copied out of the verdicts
-    into their own field so provenance is not only buried inside them. The
-    decision object is not revised either way.
+    The state is shown because the redundancy a detectable fault breaks lives
+    in it. `check_state` is not shown: the model gets it only by calling the
+    tool, so noticing stays the model's job. `surface_evidence` is condition D.
     """
+    paths = field_paths(state)
+    allowed = set(paths)
     payload: dict[str, Any] = {
         "committed_action_id": decision.action_id,
+        "state": state.model_dump(mode="json"),
         "verdicts": [verdict.model_dump(mode="json") for verdict in verdicts],
+        "field_paths": paths,
     }
     if surface_evidence:
         payload["evidence"] = [
             {"agent": verdict.agent, "action_id": verdict.action_id, "evidence": verdict.evidence}
             for verdict in verdicts
         ]
-    result = complete_structured(
-        client,
-        [
-            Message(
-                "system",
-                "The action is already committed. If that choice were wrong, name the "
-                "agent whose input is most likely responsible and the WorldState field. "
-                "Reply with JSON only: agent, field, confidence. No prose, no code fence.",
-            ),
-            Message("user", json.dumps(payload, sort_keys=True)),
-        ],
-        response_model=BlameAttribution,
+
+    def finish(raw: dict[str, Any]) -> _BlameAnswer:
+        answer = _BlameAnswer.model_validate(raw)
+        if (answer.agent is None) != (answer.field is None):
+            raise ValueError("agent and field must both be null or both be set")
+        if answer.field is not None:
+            if answer.field not in allowed:
+                raise ValueError(f"{answer.field} is not one of field_paths")
+            if not answer.field.startswith(f"{answer.agent}."):
+                raise ValueError(f"{answer.field} does not belong to {answer.agent}")
+        return answer
+
+    def reconcile(_: dict[str, Any]) -> str:
+        return json.dumps([violation.model_dump(mode="json") for violation in check_state(state)])
+
+    result = BoundedLoop(client, tool_cap=1, token_budget=token_budget).run_until(
+        [Message("system", _BLAME_SYSTEM), Message("user", json.dumps(payload, sort_keys=True))],
+        {"reconcile": reconcile},
+        finish=finish,
+        finish_label="an answer with agent, field and confidence",
         model=model,
         temperature=temperature,
         seed=seed,
         max_tokens=max_tokens,
     )
-    parsed = result.parsed
-    if not isinstance(parsed, BlameAttribution):
-        return BlameAttribution(parse_failed=True)
-    return parsed
+    called = "reconcile" in result.tools_called
+    if result.final is None:
+        return BlameAttribution(parse_failed=True, reconcile_called=called, refused=result.refused)
+    return BlameAttribution(
+        agent=result.final.agent,
+        field=result.final.field,
+        confidence=result.final.confidence,
+        reconcile_called=called,
+        refused=result.refused,
+    )
 
 
 def _choose(

@@ -138,6 +138,16 @@ def test_prompt_contains_only_the_fiduciary_slice(clean: WorldState) -> None:
     assert "reconcile" not in blob
 
 
+def test_system_prompt_states_the_verdict_schema(clean: WorldState) -> None:
+    client = _Script([_batch("a1", "a2")])
+    FiduciaryAgent(client, reconcile=False).run(clean, **CALL)
+    system = client.calls[0][0].content
+    for key in AgentVerdict.model_fields:
+        assert f'"{key}"' in system
+    assert "280" in system
+    assert "fiduciary." in system
+
+
 def test_reconcile_is_a_condition_not_a_fork(clean: WorldState) -> None:
     spec = next(s for s in LIBRARY if s.fault_id == "d_fid_balance")
     faulted, _ = inject_state_fault(clean, spec)

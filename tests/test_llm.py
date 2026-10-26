@@ -17,6 +17,7 @@ from ato.llm import (
     Message,
     cache_key,
     complete_structured,
+    temperature_sent,
 )
 from ato.schema import AgentVerdict
 
@@ -201,3 +202,41 @@ def test_anthropic_client_rejects_a_system_message_after_chat() -> None:
             **CALL,
         )
     assert messages_api.calls == []
+
+
+class _NoTemperature:
+    def __init__(self) -> None:
+        self.calls: list[dict[str, Any]] = []
+
+    def create(
+        self,
+        *,
+        model: str,
+        max_tokens: int,
+        messages: list[dict[str, str]],
+        system: str | None = None,
+    ) -> SimpleNamespace:
+        self.calls.append({"model": model, "messages": messages, "system": system})
+        return SimpleNamespace(
+            content=[SimpleNamespace(text=_verdict_json())],
+            usage=SimpleNamespace(input_tokens=1, output_tokens=1),
+            stop_reason="end_turn",
+        )
+
+
+def test_temperature_is_sent_only_when_the_sdk_takes_it() -> None:
+    open_api = _Messages(_verdict_json())
+    open_client = AnthropicClient(SimpleNamespace(messages=open_api))
+    open_client.complete(MSGS, **CALL)
+    assert open_api.calls[0]["temperature"] == 0.0
+    assert temperature_sent(CachingClient(open_client), 0.0) == 0.0
+
+    closed_api = _NoTemperature()
+    closed_client = AnthropicClient(SimpleNamespace(messages=closed_api))
+    closed_client.complete(MSGS, **CALL)
+    assert closed_client.sends_temperature is False
+    assert temperature_sent(CachingClient(closed_client), 0.0) is None
+
+
+def test_a_fake_client_never_claims_a_temperature() -> None:
+    assert temperature_sent(FakeClient(), 0.0) is None

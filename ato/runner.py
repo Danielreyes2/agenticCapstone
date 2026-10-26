@@ -23,7 +23,7 @@ from pydantic import BaseModel
 from ato.agents.fiduciary import FiduciaryAgent
 from ato.arbiter import VerdictRound, arbitrate, attribute_blame
 from ato.faults import LIBRARY, FaultRecord, FaultSpec, inject_output_fault, inject_state_fault
-from ato.llm import LLMClient, LLMResponse, Message
+from ato.llm import LLMClient, LLMResponse, Message, temperature_sent
 from ato.provider import FixtureProvider
 from ato.schema import AgentVerdict, WorldState
 
@@ -50,7 +50,42 @@ _COLUMNS = (
     "input_tokens",
     "output_tokens",
     "truncated",
+    "agent_parse_failed",
+    "agent_verdict_count",
+    "blame_refused",
+    "reconcile_called",
+    "temperature_sent",
 )
+
+# Nullable only where null is a true answer: no fault, no choice, no blame, or
+# no temperature reached the provider.
+_SCHEMA = """
+CREATE TABLE IF NOT EXISTS runs (
+    created_at TEXT NOT NULL,
+    scenario_id TEXT NOT NULL,
+    condition TEXT NOT NULL,
+    pair_key TEXT NOT NULL,
+    seed INTEGER NOT NULL,
+    temperature REAL NOT NULL,
+    model TEXT NOT NULL,
+    fault_record TEXT,
+    chosen_action TEXT,
+    blame_agent TEXT,
+    blame_field TEXT,
+    blame_confidence REAL,
+    blame_parse_failed INTEGER NOT NULL,
+    prompt_hashes TEXT NOT NULL,
+    response_hashes TEXT NOT NULL,
+    input_tokens INTEGER NOT NULL,
+    output_tokens INTEGER NOT NULL,
+    truncated INTEGER NOT NULL,
+    agent_parse_failed INTEGER NOT NULL,
+    agent_verdict_count INTEGER NOT NULL,
+    blame_refused INTEGER NOT NULL,
+    reconcile_called INTEGER NOT NULL,
+    temperature_sent REAL
+)
+"""
 
 
 def dry_run_responses(state: WorldState) -> list[str]:
@@ -89,7 +124,7 @@ def execute(
     fault_id: str | None = None,
     client: LLMClient | None = None,
     fixtures_dir: Path | None = None,
-    max_tokens: int = 1024,
+    max_tokens: int = 2048,
     token_budget: int = 8000,
 ) -> None:
     spec = _lookup(fault_id)
@@ -123,6 +158,7 @@ def execute(
         token_budget=token_budget,
     )
     blame = attribute_blame(
+        state,
         verdicts,
         decision,
         client=recording,
@@ -153,6 +189,11 @@ def execute(
             "input_tokens": recording.input_tokens,
             "output_tokens": recording.output_tokens,
             "truncated": int(run.truncated or decision.truncated),
+            "agent_parse_failed": int(run.parse_failed),
+            "agent_verdict_count": len(verdicts),
+            "blame_refused": int(blame.refused),
+            "reconcile_called": int(blame.reconcile_called),
+            "temperature_sent": temperature_sent(inner, temperature),
         },
     )
 
@@ -206,30 +247,12 @@ def _insert(db_path: Path, row: dict[str, object]) -> None:
     names = ", ".join(_COLUMNS)
     marks = ", ".join("?" for _ in _COLUMNS)
     with sqlite3.connect(db_path) as conn:
-        conn.execute(
-            """
-            CREATE TABLE IF NOT EXISTS runs (
-                created_at TEXT NOT NULL,
-                scenario_id TEXT NOT NULL,
-                condition TEXT NOT NULL,
-                pair_key TEXT NOT NULL,
-                seed INTEGER NOT NULL,
-                temperature REAL NOT NULL,
-                model TEXT NOT NULL,
-                fault_record TEXT,
-                chosen_action TEXT,
-                blame_agent TEXT,
-                blame_field TEXT,
-                blame_confidence REAL,
-                blame_parse_failed INTEGER NOT NULL,
-                prompt_hashes TEXT NOT NULL,
-                response_hashes TEXT NOT NULL,
-                input_tokens INTEGER NOT NULL,
-                output_tokens INTEGER NOT NULL,
-                truncated INTEGER NOT NULL
-            )
-            """
-        )
+        conn.execute(_SCHEMA)
+        existing = [info[1] for info in conn.execute("PRAGMA table_info(runs)")]
+        if existing != list(_COLUMNS):
+            # Mixing rows from two schemas would score old runs as if they
+            # had the new columns. Start a new log instead.
+            raise ValueError(f"{db_path} was written with an older run-log schema; use a new --db")
         conn.execute(
             f"INSERT INTO runs ({names}) VALUES ({marks})",
             tuple(row[name] for name in _COLUMNS),

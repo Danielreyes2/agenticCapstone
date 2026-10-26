@@ -33,7 +33,12 @@ REQUIRED = (
     "input_tokens",
     "output_tokens",
     "truncated",
+    "agent_parse_failed",
+    "agent_verdict_count",
+    "blame_refused",
+    "reconcile_called",
 )
+CALL_COLUMNS = ("agent_parse_failed", "agent_verdict_count", "blame_refused", "reconcile_called")
 
 
 def _rows(db: Path) -> list[sqlite3.Row]:
@@ -172,6 +177,25 @@ def test_clean_and_faulted_share_a_pair_key(tmp_path: Path) -> None:
     assert clean_row["seed"] == faulted_row["seed"]
     assert clean_row["fault_record"] is None
     assert "d_fid_balance" in faulted_row["fault_record"]
+    for column in CALL_COLUMNS:
+        assert clean_row[column] == faulted_row[column]
+
+
+def test_call_columns_describe_the_calls(tmp_path: Path) -> None:
+    row = _rows(_run(tmp_path))[0]
+    assert row["agent_parse_failed"] == 0
+    assert row["agent_verdict_count"] == 2
+    assert row["blame_refused"] == 0
+    assert row["reconcile_called"] == 0
+    assert row["temperature_sent"] is None
+
+
+def test_a_log_with_an_older_schema_is_refused(tmp_path: Path) -> None:
+    db = tmp_path / "runs.sqlite"
+    with sqlite3.connect(db) as conn:
+        conn.execute("CREATE TABLE runs (created_at TEXT NOT NULL)")
+    with pytest.raises(ValueError, match="older run-log schema"):
+        _run(tmp_path)
 
 
 def test_condition_d_surfaces_evidence(tmp_path: Path) -> None:

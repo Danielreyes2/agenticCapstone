@@ -5,10 +5,17 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from ato.arbiter import BlameAttribution, VerdictRound, arbitrate, attribute_blame
-from ato.llm import FakeClient
+from ato.arbiter import (
+    BlameAttribution,
+    VerdictRound,
+    arbitrate,
+    attribute_blame,
+    field_paths,
+)
+from ato.faults import LIBRARY, applies_to, inject_state_fault
+from ato.llm import FakeClient, LLMResponse
 from ato.provider import FixtureProvider
-from ato.schema import AgentName, AgentVerdict, WorldState
+from ato.schema import AgentName, AgentVerdict, WorldState, check_state
 
 CALL = {"model": "test-model", "temperature": 0.0, "seed": 7, "max_tokens": 256}
 AGENTS: tuple[AgentName, ...] = ("fiduciary", "wellness", "productivity")
@@ -162,12 +169,14 @@ def test_blame_cannot_reshape_the_decision(clean: WorldState) -> None:
     untouched = arbitrate(clean, [batch])
     blamed = arbitrate(clean, [batch])
     attribute_blame(
+        clean,
         batch.verdicts,
         blamed,
         client=FakeClient(in_order=[_blame("wellness", "wellness.hrv_today", 0.9)]),
         **CALL,
     )
     attribute_blame(
+        clean,
         batch.verdicts,
         untouched,
         client=FakeClient(in_order=["not json", "still not json"]),
@@ -181,10 +190,102 @@ def test_blame_parses_one_structured_answer(clean: WorldState) -> None:
     batch = _round({"a1": 0.1, "a2": 0.8})
     decision = arbitrate(clean, [batch])
     client = FakeClient(in_order=[_blame("fiduciary", "fiduciary.discretionary_remaining", 0.4)])
-    blame = attribute_blame(batch.verdicts, decision, client=client, **CALL)
+    blame = attribute_blame(clean, batch.verdicts, decision, client=client, **CALL)
     assert blame == BlameAttribution(
         agent="fiduciary",
         field="fiduciary.discretionary_remaining",
         confidence=0.4,
     )
     assert len(client.calls) == 1
+
+
+def test_field_paths_cover_every_slice_and_ignore_the_fault(clean: WorldState) -> None:
+    paths = field_paths(clean)
+    for prefix in ("fiduciary.", "wellness.", "productivity."):
+        assert any(path.startswith(prefix) for path in paths)
+    assert not any(path.startswith("candidate_actions") for path in paths)
+    for spec in LIBRARY:
+        if spec.surface != "state" or not applies_to(spec, clean):
+            continue
+        faulted, record = inject_state_fault(clean, spec)
+        assert field_paths(faulted) == paths
+        assert record.truth_field in paths
+
+
+def test_blame_outside_the_field_list_is_a_parse_failure(clean: WorldState) -> None:
+    batch = _round({"a1": 0.1, "a2": 0.8})
+    decision = arbitrate(clean, [batch])
+    invented = _blame("fiduciary", "fiduciary.discretionary_budget_remaining", 0.4)
+    client = FakeClient(in_order=[invented, invented])
+    blame = attribute_blame(clean, batch.verdicts, decision, client=client, **CALL)
+    assert blame.parse_failed is True
+    assert len(client.calls) == 2
+
+
+def test_blame_may_abstain(clean: WorldState) -> None:
+    batch = _round({"a1": 0.1, "a2": 0.8})
+    decision = arbitrate(clean, [batch])
+    abstain = json.dumps({"agent": None, "field": None, "confidence": 0.8})
+    client = FakeClient(in_order=[abstain])
+    blame = attribute_blame(clean, batch.verdicts, decision, client=client, **CALL)
+    assert blame.parse_failed is False
+    assert blame.agent is None and blame.field is None
+    system = client.calls[0]["messages"][0].content
+    assert "null" in system
+
+
+def test_blame_field_must_belong_to_the_named_agent(clean: WorldState) -> None:
+    batch = _round({"a1": 0.1, "a2": 0.8})
+    decision = arbitrate(clean, [batch])
+    crossed = _blame("wellness", "fiduciary.discretionary_remaining", 0.4)
+    client = FakeClient(in_order=[crossed, crossed])
+    blame = attribute_blame(clean, batch.verdicts, decision, client=client, **CALL)
+    assert blame.parse_failed is True
+
+
+def test_blame_sees_the_state_but_not_the_check(clean: WorldState) -> None:
+    spec = next(s for s in LIBRARY if s.fault_id == "d_fid_balance")
+    faulted, _ = inject_state_fault(clean, spec)
+    batch = _round({"a1": 0.1, "a2": 0.8})
+    decision = arbitrate(faulted, [batch])
+    client = FakeClient(in_order=[_blame("fiduciary", "fiduciary.cycle_budget", 0.3)])
+    blame = attribute_blame(faulted, batch.verdicts, decision, client=client, **CALL)
+    assert blame.reconcile_called is False
+    sent = "\n".join(message.content for message in client.calls[0]["messages"])
+    payload = json.loads(client.calls[0]["messages"][-1].content)
+    assert payload["state"]["fiduciary"]["discretionary_remaining"] == 180.0
+    assert '"rule"' not in sent
+    assert "d_fid_balance" not in sent
+
+
+def test_reconcile_is_returned_only_when_the_model_asks(clean: WorldState) -> None:
+    spec = next(s for s in LIBRARY if s.fault_id == "d_fid_balance")
+    faulted, _ = inject_state_fault(clean, spec)
+    batch = _round({"a1": 0.1, "a2": 0.8})
+    decision = arbitrate(faulted, [batch])
+    client = FakeClient(
+        in_order=[
+            json.dumps({"tool": "reconcile", "args": {}}),
+            _blame("fiduciary", "fiduciary.discretionary_remaining", 0.9),
+        ]
+    )
+    blame = attribute_blame(faulted, batch.verdicts, decision, client=client, **CALL)
+    assert blame.reconcile_called is True
+    assert blame.field == "fiduciary.discretionary_remaining"
+    observation = client.calls[1]["messages"][-1].content
+    assert json.loads(observation) == [
+        violation.model_dump(mode="json") for violation in check_state(faulted)
+    ]
+
+
+def test_a_refusal_is_recorded(clean: WorldState) -> None:
+    batch = _round({"a1": 0.1, "a2": 0.8})
+    decision = arbitrate(clean, [batch])
+
+    class _Refuses:
+        def complete(self, messages: object, **_: object) -> LLMResponse:
+            return LLMResponse(text="", finish_reason="refusal")
+
+    blame = attribute_blame(clean, batch.verdicts, decision, client=_Refuses(), **CALL)
+    assert blame.refused is True
+    assert blame.parse_failed is True
