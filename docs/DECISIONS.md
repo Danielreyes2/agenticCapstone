@@ -156,11 +156,12 @@ preserves full n.
 Leaning: both conditions, C1a as headline, C1b reported as system-level detection
 ("the agent caught it X% of the time, the arbiter caught Y% of the rest").
 
-## OPEN-2 — Scenario count · open, leaning 80–100
+## OPEN-2 — Scenario count · settled at 100
 
-See `docs/SPEC.md` §8 for the numbers. 40 is underpowered for a null result.
-Leaning 80–100. Blocked on nothing; decide before the generator is written, since
-the generator makes the count nearly free.
+See `docs/SPEC.md` §8 for the numbers. 40 is underpowered for a null result:
+the 95% interval on the C1 − C0 difference is about ±13 points there, ±9.3 at
+80, and ±8.3 at 100. Settled at 100, the top of that range. The generator is
+not capped at 100. Its acceptance sample is 200, and the sweep asks for 100.
 
 ## OPEN-3 — Temperature · open, must be decided before the week-1 gate
 
