@@ -32,6 +32,7 @@ The kickoff prompt is `docs/KICKOFF_PROMPT.md`.
 | `AGENTS.md` | The brief. Non-negotiables, scope boundaries, conventions |
 | `docs/SPEC.md` | The contract: schema, invariants, fault taxonomy, metrics, conditions |
 | `docs/DECISIONS.md` | Why things are as they are, and the four items still open |
+| `docs/REPORT.md` | Week-1 gate: counts, intervals, and the precommitted outcomes |
 | `TASKS.md` | Ordered work queue with acceptance criteria |
 | `ato/schema.py` | `WorldState`, `AgentVerdict`, `check_state`, `check_verdicts` |
 | `ato/provider.py` | The provider seam. `FixtureProvider` (strict), `LiveProvider` (stub) |
