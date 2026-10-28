@@ -20,6 +20,16 @@ make install
 make check
 ```
 
+## Viewer
+
+A local page over the fixtures and any gate log in `runs/`. It does not call a model.
+
+```bash
+python -m viz.server
+```
+
+Then open http://127.0.0.1:8765.
+
 ## If you are an AI coding agent
 
 Read `AGENTS.md` first, then `docs/SPEC.md`, `docs/DECISIONS.md`, `TASKS.md`.

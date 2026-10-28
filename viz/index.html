@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ATO bench</title>
+<style>
+  :root {
+    --bg: #14160f;
+    --ink: #f3efe4;
+    --muted: #a39e90;
+    --line: #2c2f24;
+    --card: #1c1f16;
+    --gold: #e4c27a;
+    --green: #8fceae;
+    --blue: #9eb7e0;
+    --fault: #e07a5f;
+    --ok: #c6d47a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.45 "Avenir Next", "Segoe UI", sans-serif;
+  }
+  header, main { width: min(1120px, calc(100% - 32px)); margin: 0 auto; }
+  header { padding: 28px 0 12px; }
+  h1 { font-weight: 600; font-size: 28px; letter-spacing: -0.03em; margin: 0; }
+  .lede { color: var(--muted); margin: 6px 0 0; max-width: 62ch; }
+  .controls { display: flex; flex-wrap: wrap; gap: 16px; margin: 22px 0; }
+  label { display: grid; gap: 6px; color: var(--muted); font-size: 13px; }
+  select {
+    background: var(--card);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font: inherit;
+    min-width: 220px;
+  }
+  .status {
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    margin-bottom: 18px; min-height: 32px;
+  }
+  .pill {
+    border-radius: 999px; padding: 4px 10px; font-size: 13px;
+    border: 1px solid var(--line); color: var(--muted);
+  }
+  .pill.bad { color: var(--fault); border-color: #6a3a30; }
+  .pill.good { color: var(--ok); border-color: #3d4a28; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+  article {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 16px;
+    min-height: 280px;
+  }
+  article h2 { margin: 0 0 12px; font-size: 15px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+  article.fiduciary h2 { color: var(--gold); }
+  article.wellness h2 { color: var(--green); }
+  article.productivity h2 { color: var(--blue); }
+  .stat { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+  .stat b { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .mark { color: var(--fault); }
+  .hrv { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 12px; }
+  .day {
+    height: 72px; border-radius: 8px; background: #2a3328;
+    display: flex; align-items: flex-end; justify-content: center;
+    font-size: 11px; color: var(--ink); padding-bottom: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .day.off { background: transparent; border: 1px dashed #4a5244; color: var(--muted); align-items: center; }
+  .track { position: relative; height: 36px; margin: 14px 0; background: #26291f; border-radius: 8px; }
+  .block {
+    position: absolute; top: 4px; bottom: 4px; border-radius: 6px;
+    background: var(--blue); color: #14160f; font-size: 11px;
+    display: flex; align-items: center; padding: 0 6px; overflow: hidden; white-space: nowrap;
+  }
+  .block.low { background: #6e7c93; }
+  .block.high { background: #d7e4ff; }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0; }
+  .action {
+    border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; min-width: 160px;
+  }
+  .action.chosen { border-color: var(--gold); }
+  .action small { display: block; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 8px 0 28px; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; font-size: 12px; }
+  tr.picked { background: #26291a; }
+  button.link {
+    background: none; border: 0; color: inherit; font: inherit; padding: 0; cursor: pointer; text-align: left;
+  }
+  .hit { color: var(--ok); }
+  .miss { color: var(--fault); }
+  footer { color: var(--muted); font-size: 13px; padding-bottom: 40px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>ATO bench</h1>
+  <p class="lede">The three slices a scenario hands the agents, a fault you can lay on top, and the blame the gate already recorded. This page does not call a model.</p>
+  <div class="controls">
+    <label>Scenario
+      <select id="scenario"></select>
+    </label>
+    <label>Fault preview
+      <select id="fault"></select>
+    </label>
+  </div>
+  <div class="status" id="status"></div>
+</header>
+<main>
+  <div class="grid">
+    <article class="fiduciary" id="fiduciary"></article>
+    <article class="wellness" id="wellness"></article>
+    <article class="productivity" id="productivity"></article>
+  </div>
+  <h2 style="margin:22px 0 8px; font-size:15px;">Candidate actions</h2>
+  <div class="actions" id="actions"></div>
+  <h2 style="margin:8px 0; font-size:15px;">Recorded gate runs</h2>
+  <p class="lede" id="run-note"></p>
+  <table>
+    <thead>
+      <tr><th>Log</th><th>Condition</th><th>Seed</th><th>Chose</th><th>Blame</th><th></th></tr>
+    </thead>
+    <tbody id="runs"></tbody>
+  </table>
+  <footer>Selecting a row marks the action that run chose and the field it blamed. Ground truth is visible here because this is the scoring view. The agents never receive it.</footer>
+</main>
+<script>
+const scenarioEl = document.querySelector("#scenario");
+const faultEl = document.querySelector("#fault");
+const statusEl = document.querySelector("#status");
+let current = null;
+let picked = null;
+
+function money(n) { return "$" + Number(n).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
+function mark(path) {
+  if (!current || !current.fault) return "";
+  return current.fault.path === path ? " mark" : "";
+}
+function blamed(path) {
+  if (!picked || picked.blame_field !== path) return "";
+  return " mark";
+}
+
+function render() {
+  const view = current;
+  const fault = view.fault;
+  const bits = [];
+  if (!view.applicable) bits.push(`<span class="pill">${view.reason}</span>`);
+  else if (!fault) bits.push(`<span class="pill good">clean · invariants hold</span>`);
+  else if (view.violations.length) {
+    const v = view.violations[0];
+    bits.push(`<span class="pill bad">${fault.tier} · ${v.rule} broken · ${v.field} is ${v.observed}, the books say ${v.expected}</span>`);
+  } else bits.push(`<span class="pill">${fault.tier} · ${fault.label} · no invariant breaks</span>`);
+  if (fault) bits.push(`<span class="pill">${fault.path}: ${fault.before} → ${fault.after}</span>`);
+  statusEl.innerHTML = bits.join("");
+
+  const book = view.fiduciary;
+  document.querySelector("#fiduciary").innerHTML = `
+    <h2>Fiduciary</h2>
+    <div class="stat"><span>Budget</span><b>${money(book.cycle_budget)}</b></div>
+    <div class="stat"><span>Spent</span><b>${money(book.spend)}</b></div>
+    <div class="stat"><span>Left</span><b class="${mark("fiduciary.discretionary_remaining")}${blamed("fiduciary.discretionary_remaining")}">${money(book.discretionary_remaining)}</b></div>
+    <div class="stat"><span>Days left</span><b>${book.days_left_in_cycle}</b></div>
+    ${book.transactions.filter(t => t.kind === "purchase").map(t => `
+      <div class="stat"><span>${t.descriptor.split("  ")[0]}</span><b class="${mark("fiduciary.transactions[" + t.index + "].amount")}${blamed("fiduciary.transactions[" + t.index + "].amount")}">${money(t.amount)}</b></div>
+    `).join("")}
+    ${book.liabilities.map((t, i) => `
+      <div class="stat"><span>${t.name}</span><b class="${mark("fiduciary.fixed_liabilities_upcoming[" + i + "].amount")}">${money(t.amount)} in ${t.due_in_days}d</b></div>
+    `).join("")}`;
+
+  const body = view.wellness;
+  const peak = Math.max(...body.hrv_7d.filter(v => v != null), 1);
+  document.querySelector("#wellness").innerHTML = `
+    <h2>Wellness</h2>
+    <div class="stat"><span>Readiness</span><b>${body.readiness_score}</b></div>
+    <div class="stat"><span>Sleep</span><b>${body.sleep_hours_last} h</b></div>
+    <div class="stat"><span>Strain</span><b class="${mark("wellness.strain_7d")}${blamed("wellness.strain_7d")}">${body.strain_7d}</b></div>
+    <div class="stat"><span>Today</span><b>${body.hrv_today == null ? "not worn" : body.hrv_today}</b></div>
+    <div class="stat"><span>Baseline</span><b class="${mark("wellness.hrv_baseline_7d")}${blamed("wellness.hrv_baseline_7d")}">${body.hrv_baseline_7d == null ? "none" : body.hrv_baseline_7d}</b></div>
+    <div class="hrv">${body.hrv_7d.map((v, i) => v == null
+      ? `<div class="day off${blamed("wellness.hrv_7d[" + i + "]")}">off</div>`
+      : `<div class="day" style="height:${Math.round(28 + 56 * v / peak)}px">${v}</div>`).join("")}</div>`;
+
+  const day = view.productivity;
+  document.querySelector("#productivity").innerHTML = `
+    <h2>Productivity</h2>
+    <div class="stat"><span>Window</span><b>${day.day_start}–${day.day_end}</b></div>
+    <div class="stat"><span>Longest open block</span><b class="${mark("productivity.longest_free_block_min")}${blamed("productivity.longest_free_block_min")}">${day.longest_free_block_min} min</b></div>
+    ${day.deadlines.map((d, i) => `<div class="stat"><span>${d.name}</span><b class="${mark("productivity.deadlines[" + i + "].due_in_days")}">${d.due_in_days}d</b></div>`).join("")}
+    <div class="track">${day.meetings.map(m => `<div class="block ${m.priority}" style="left:${m.left}%;width:${Math.max(m.width, 4)}%">${m.title}</div>`).join("")}</div>`;
+
+  document.querySelector("#actions").innerHTML = view.actions.map(action => `
+    <div class="action ${picked && picked.chosen_action === action.id ? "chosen" : ""}">
+      <b>${action.desc}</b>
+      <small>${action.id} · ${money(action.cost)} · ${action.time_min} min</small>
+    </div>`).join("");
+
+  const note = view.runs.length
+    ? "Click a row. Gold border is the action that run chose. Red is the field it blamed."
+    : "No gate log for this scenario is on disk. The preview above still works.";
+  document.querySelector("#run-note").textContent = note;
+  document.querySelector("#runs").innerHTML = view.runs.map((run, index) => `
+    <tr class="${picked === run ? "picked" : ""}">
+      <td><button class="link" data-i="${index}">${run.model.replace("claude-", "")}</button></td>
+      <td>${run.condition}${run.fault_id ? " · " + run.fault_id : ""}</td>
+      <td>${run.seed}</td>
+      <td>${run.chosen_action || "—"}</td>
+      <td>${run.blame_field || "abstain"}</td>
+      <td class="${run.label === "hit" || run.label === "clear" ? "hit" : "miss"}">${run.label}</td>
+    </tr>`).join("");
+  document.querySelectorAll("#runs button").forEach(button => {
+    button.addEventListener("click", () => {
+      picked = view.runs[Number(button.dataset.i)];
+      render();
+    });
+  });
+}
+
+async function load() {
+  const id = scenarioEl.value;
+  const fault = faultEl.value;
+  const response = await fetch(`/api/scenario?id=${encodeURIComponent(id)}&fault=${encodeURIComponent(fault)}`);
+  current = await response.json();
+  picked = null;
+  render();
+}
+
+async function boot() {
+  const response = await fetch("/api/index");
+  const index = await response.json();
+  scenarioEl.innerHTML = index.scenarios.map(row =>
+    `<option value="${row.id}">${row.id} · ${row.date} · ${row.actions.join(" / ")}</option>`).join("");
+  scenarioEl.value = "s007";
+  faultEl.innerHTML = `<option value="">Clean</option>` + index.faults.map(row =>
+    `<option value="${row.id}">${row.tier === "detectable" ? "Detectable" : "Control"} · ${row.label}</option>`).join("");
+  scenarioEl.addEventListener("change", load);
+  faultEl.addEventListener("change", load);
+  await load();
+}
+boot();
+</script>
+</body>
+</html>

@@ -12,12 +12,12 @@ test:
 	$(PY) -m pytest
 
 lint:
-	$(PY) -m ruff check ato tests $(wildcard scripts)
-	$(PY) -m ruff format --check ato tests $(wildcard scripts)
+	$(PY) -m ruff check ato tests viz $(wildcard scripts)
+	$(PY) -m ruff format --check ato tests viz $(wildcard scripts)
 
 format:
-	$(PY) -m ruff check --fix ato tests $(wildcard scripts)
-	$(PY) -m ruff format ato tests $(wildcard scripts)
+	$(PY) -m ruff check --fix ato tests viz $(wildcard scripts)
+	$(PY) -m ruff format ato tests viz $(wildcard scripts)
 
 types:
 	$(PY) -m mypy ato
