@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ATO witness</title>
+<style>
+  :root {
+    --paper: #f6f1e7;
+    --ink: #241f1a;
+    --muted: #746c62;
+    --line: #e4dccf;
+    --bubble: #fffdf8;
+    --coral: #d97757;
+    --gold: #e7c98a;
+    --sage: #b7d4c2;
+    --blue: #c5d4ef;
+    --clay: #efc2b2;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(900px 280px at 50% -40px, #fff 0%, transparent 70%),
+      var(--paper);
+    color: var(--ink);
+    font: 16px/1.45 "Avenir Next", "Segoe UI", sans-serif;
+  }
+  header, main { width: min(820px, calc(100% - 32px)); margin: 0 auto; }
+  header { padding: 28px 0 8px; display: flex; justify-content: space-between; gap: 16px; align-items: end; }
+  h1 { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.03em; }
+  a { color: var(--muted); }
+  .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin: 14px 0 8px; }
+  label { display: grid; gap: 4px; color: var(--muted); font-size: 13px; }
+  select, button {
+    background: var(--bubble);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font: inherit;
+  }
+  button { cursor: pointer; background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .stage {
+    margin: 18px 0 8px;
+    padding: 22px 12px 8px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 18px;
+    min-height: 168px;
+  }
+  .person { width: 92px; text-align: center; color: var(--muted); font-size: 13px; }
+  .person.observer { width: 108px; }
+  .head {
+    width: 64px; height: 64px; margin: 0 auto 8px; border-radius: 50%;
+    background: #efe8dc; position: relative;
+    box-shadow: 0 8px 0 rgba(36, 31, 26, 0.04);
+    transition: transform 180ms ease, box-shadow 180ms ease;
+  }
+  .observer .head { width: 76px; height: 76px; background: #f3d2c6; }
+  .fiduciary .head { background: var(--gold); }
+  .wellness .head { background: var(--sage); }
+  .productivity .head { background: var(--blue); }
+  .arbiter .head { background: var(--clay); }
+  .eye {
+    position: absolute; top: 26px; width: 6px; height: 7px; border-radius: 50%; background: var(--ink);
+  }
+  .observer .eye { top: 30px; }
+  .eye.left { left: 22px; }
+  .eye.right { right: 22px; }
+  .observer .eye.left { left: 26px; }
+  .observer .eye.right { right: 26px; }
+  .mouth {
+    position: absolute; left: 50%; bottom: 16px; width: 12px; height: 6px;
+    border-bottom: 2px solid var(--ink); border-radius: 0 0 10px 10px; transform: translateX(-50%);
+  }
+  .person.speaking .head { transform: translateY(-6px) scale(1.06); box-shadow: 0 0 0 4px #fff, 0 0 0 7px var(--coral); }
+  .person.quiet .head { opacity: 0.45; }
+  #thread { display: grid; gap: 10px; padding: 8px 0 48px; }
+  .line { display: flex; gap: 10px; align-items: flex-start; max-width: 640px; }
+  .line .pip { width: 28px; height: 28px; border-radius: 50%; flex: none; margin-top: 2px; }
+  .bubble {
+    background: var(--bubble);
+    border: 1px solid var(--line);
+    border-radius: 16px 16px 16px 6px;
+    padding: 10px 12px;
+  }
+  .bubble .who { display: block; font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+  .line.tool .bubble { font-family: ui-monospace, "SF Mono", monospace; font-size: 13px; }
+  .line.silent .bubble { color: var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Witness</h1>
+  </div>
+  <a href="/bench">Numbers</a>
+</header>
+<main>
+  <div class="controls">
+    <label>Scenario <select id="scenario"></select></label>
+    <label>Model <select id="model">
+      <option value="claude-opus-5-5">Opus</option>
+      <option value="claude-haiku-5-5">Haiku</option>
+    </select></label>
+    <label>Condition <select id="condition">
+      <option value="C1a">Detectable</option>
+      <option value="C0">Control</option>
+      <option value="D">Evidence shown</option>
+      <option value="B">Clean</option>
+    </select></label>
+    <button id="replay" type="button">Replay</button>
+  </div>
+  <div class="stage" id="stage">
+    <div class="person observer" data-speaker="observer"><div class="head"><i class="eye left"></i><i class="eye right"></i><i class="mouth"></i></div>Observer</div>
+    <div class="person fiduciary" data-speaker="fiduciary"><div class="head"><i class="eye left"></i><i class="eye right"></i><i class="mouth"></i></div>Fiduciary</div>
+    <div class="person wellness" data-speaker="wellness"><div class="head"><i class="eye left"></i><i class="eye right"></i><i class="mouth"></i></div>Wellness</div>
+    <div class="person productivity" data-speaker="productivity"><div class="head"><i class="eye left"></i><i class="eye right"></i><i class="mouth"></i></div>Productivity</div>
+    <div class="person arbiter" data-speaker="arbiter"><div class="head"><i class="eye left"></i><i class="eye right"></i><i class="mouth"></i></div>Arbiter</div>
+  </div>
+  <div id="thread"></div>
+</main>
+<script>
+const names = {observer: "Observer", fiduciary: "Fiduciary", wellness: "Wellness", productivity: "Productivity", arbiter: "Arbiter"};
+const colors = {observer: "#f3d2c6", fiduciary: "#e7c98a", wellness: "#b7d4c2", productivity: "#c5d4ef", arbiter: "#efc2b2"};
+let timer = null;
+let beats = [];
+
+function light(speaker) {
+  document.querySelectorAll(".person").forEach(person => {
+    person.classList.toggle("speaking", person.dataset.speaker === speaker);
+  });
+}
+
+function add(beat) {
+  light(beat.speaker);
+  const line = document.createElement("div");
+  line.className = "line " + beat.kind;
+  const pip = document.createElement("div");
+  pip.className = "pip";
+  pip.style.background = colors[beat.speaker];
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  const who = document.createElement("span");
+  who.className = "who";
+  who.textContent = names[beat.speaker];
+  bubble.append(who, document.createTextNode(beat.text));
+  line.append(pip, bubble);
+  const thread = document.querySelector("#thread");
+  thread.append(line);
+  line.scrollIntoView({block: "nearest"});
+}
+
+function play() {
+  clearInterval(timer);
+  document.querySelector("#thread").innerHTML = "";
+  document.querySelectorAll(".person").forEach(person => person.classList.remove("speaking", "quiet"));
+  let index = 0;
+  const step = () => {
+    if (index >= beats.length) {
+      clearInterval(timer);
+      return;
+    }
+    const beat = beats[index++];
+    if (beat.kind === "silent") {
+      document.querySelector(`[data-speaker="${beat.speaker}"]`).classList.add("quiet");
+    }
+    add(beat);
+  };
+  step();
+  timer = setInterval(step, 1300);
+}
+
+async function load() {
+  const id = document.querySelector("#scenario").value;
+  const model = document.querySelector("#model").value;
+  const condition = document.querySelector("#condition").value;
+  const response = await fetch(`/api/witness?id=${encodeURIComponent(id)}&model=${encodeURIComponent(model)}&condition=${encodeURIComponent(condition)}`);
+  const body = await response.json();
+  beats = body.beats;
+  play();
+}
+
+async function boot() {
+  const response = await fetch("/api/index");
+  const index = await response.json();
+  const scenario = document.querySelector("#scenario");
+  scenario.innerHTML = index.scenarios.map(row => `<option value="${row.id}">${row.id} · ${row.actions.join(" / ")}</option>`).join("");
+  scenario.value = "s007";
+  scenario.addEventListener("change", load);
+  document.querySelector("#model").addEventListener("change", load);
+  document.querySelector("#condition").addEventListener("change", load);
+  document.querySelector("#replay").addEventListener("click", play);
+  await load();
+}
+boot();
+</script>
+</body>
+</html>

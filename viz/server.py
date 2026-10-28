@@ -11,8 +11,10 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 from viz.board import fault_index, scenario_index, scenario_view
+from viz.witness import witness_call
 
-PAGE = Path(__file__).with_name("index.html")
+WITNESS = Path(__file__).with_name("witness.html")
+BENCH = Path(__file__).with_name("index.html")
 HOST = "127.0.0.1"
 PORT = 8765
 
@@ -21,8 +23,25 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
         if parsed.path == "/":
-            body = PAGE.read_bytes()
-            self._send(200, "text/html; charset=utf-8", body)
+            self._send(200, "text/html; charset=utf-8", WITNESS.read_bytes())
+            return
+        if parsed.path == "/bench":
+            self._send(200, "text/html; charset=utf-8", BENCH.read_bytes())
+            return
+        if parsed.path == "/api/witness":
+            query = parse_qs(parsed.query)
+            try:
+                seed = int(query.get("seed", ["1"])[0])
+            except ValueError:
+                self._send(404, "application/json", b'{"error":"bad seed"}')
+                return
+            payload = witness_call(
+                query.get("id", ["s007"])[0],
+                model=query.get("model", ["claude-opus-5-5"])[0],
+                condition=query.get("condition", ["C1a"])[0],
+                seed=seed,
+            )
+            self._send(200, "application/json", json.dumps(payload).encode())
             return
         if parsed.path == "/api/index":
             payload = {"scenarios": scenario_index(), "faults": fault_index()}

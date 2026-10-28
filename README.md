@@ -22,13 +22,13 @@ make check
 
 ## Viewer
 
-A local page over the fixtures and any gate log in `runs/`. It does not call a model.
+A local page that replays one recorded call, and a bench over the fixtures. Neither calls a model.
 
 ```bash
 python -m viz.server
 ```
 
-Then open http://127.0.0.1:8765.
+Then open http://127.0.0.1:8765. The numbers view is http://127.0.0.1:8765/bench.
 
 ## If you are an AI coding agent
 
