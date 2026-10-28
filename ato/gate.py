@@ -66,6 +66,7 @@ def run_gate(
     rescue: bool = False,
     token_cap: int = TOKEN_CAP,
     show_progress: bool = False,
+    model: str = MODEL,
 ) -> dict[str, object]:
     if not dry_run and not pilot and not confirm and not rescue:
         raise ValueError("the full live gate requires --confirm")
@@ -87,7 +88,7 @@ def run_gate(
             fault_id=item.fault_id,
             seed=item.seed,
             temperature=TEMPERATURE,
-            model="fake" if dry_run else MODEL,
+            model="fake" if dry_run else model,
             db_path=db_path,
             cache_dir=cache_dir,
             dry_run=dry_run,

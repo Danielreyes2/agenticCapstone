@@ -152,3 +152,23 @@ def test_token_cap_stops_after_the_first_row(tmp_path: Path) -> None:
     )
     assert report["completed"] == 1
     assert report["stopped"]
+
+
+def test_a_named_model_is_sent_on_a_live_call(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    seen: list[str] = []
+
+    def spy(**kwargs: object) -> None:
+        seen.append(str(kwargs["model"]))
+
+    monkeypatch.setattr("ato.gate.execute", spy)
+    run_gate(
+        db_path=tmp_path / "gate.sqlite",
+        cache_dir=tmp_path / "cache",
+        dry_run=False,
+        pilot=True,
+        confirm=False,
+        model="claude-haiku-5-5",
+    )
+    assert seen == ["claude-haiku-5-5"]

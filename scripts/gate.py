@@ -26,6 +26,7 @@ def main(argv: list[str] | None = None) -> int:
     # runs/gate.sqlite and .cache/gate hold the first gate and are kept as evidence.
     parser.add_argument("--db", type=Path, default=Path("runs/gate2.sqlite"))
     parser.add_argument("--cache-dir", type=Path, default=Path(".cache/gate2"))
+    parser.add_argument("--model", default=MODEL, help="live model id; default stays Opus")
     args = parser.parse_args(argv)
     if args.watch:
         watch(args.db)
@@ -38,8 +39,9 @@ def main(argv: list[str] | None = None) -> int:
         confirm=args.confirm,
         rescue=args.d,
         show_progress=True,
+        model=args.model,
     )
-    print(f"model {MODEL if not args.dry_run else 'fake'}")
+    print(f"model {args.model if not args.dry_run else 'fake'}")
     print(format_report(report))
     return 0
 
